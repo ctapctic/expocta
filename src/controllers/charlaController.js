@@ -1,6 +1,16 @@
 const db = require('../config/db');
 
 /**
+ * Normaliza el valor de un input datetime-local ("YYYY-MM-DDTHH:MM")
+ * al formato DATETIME de MariaDB ("YYYY-MM-DD HH:MM:SS"), sin conversión de zona.
+ */
+function normalizarHorario(valor) {
+  if (!valor) return valor;
+  const s = String(valor).trim().replace('T', ' ').replace('Z', '');
+  return s.length === 16 ? `${s}:00` : s.slice(0, 19);
+}
+
+/**
  * Obtener listado de charlas y conferencias técnicas
  */
 exports.getAllCharlas = async (req, res, next) => {
@@ -8,6 +18,7 @@ exports.getAllCharlas = async (req, res, next) => {
     const rawRows = await db.query(`
       SELECT 
         c.*,
+        DATE_FORMAT(c.horario, '%Y-%m-%d %H:%i:%s') AS horario_str,
         COALESCE(AVG((v.nota_contenido + v.nota_expositor) / 2.0), 0) AS promedio_valoracion,
         COUNT(v.id) AS total_valoraciones
       FROM charlas c
@@ -43,6 +54,7 @@ exports.getCharlaByIdOrCode = async (req, res, next) => {
     const rows = await db.query(`
       SELECT 
         c.*,
+        DATE_FORMAT(c.horario, '%Y-%m-%d %H:%i:%s') AS horario_str,
         COALESCE(AVG((v.nota_contenido + v.nota_expositor) / 2.0), 0) AS promedio_valoracion,
         COALESCE(AVG(v.nota_contenido), 0) AS avg_contenido,
         COALESCE(AVG(v.nota_expositor), 0) AS avg_expositor,
@@ -141,7 +153,7 @@ exports.updateCharla = async (req, res, next) => {
       expositor.trim(),
       biografia_expositor ? biografia_expositor.trim() : '',
       foto_expositor_url,
-      horario,
+      normalizarHorario(horario),
       ubicacion.trim(),
       diapositivas_pdf_url,
       id
@@ -217,7 +229,7 @@ exports.createCharla = async (req, res, next) => {
       expositor.trim(),
       biografia_expositor ? biografia_expositor.trim() : '',
       foto_expositor_url,
-      horario,
+      normalizarHorario(horario),
       ubicacion.trim(),
       diapositivas_pdf_url
     ]);

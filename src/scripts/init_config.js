@@ -39,9 +39,11 @@ async function run() {
 
     console.log('✅ Valores por defecto insertados (INSERT IGNORE, no sobreescribe existentes).');
     console.log('🎉 Listo. Puedes editar la configuración desde /config.html (admin).');
+    try { await db.pool.end(); } catch (_) {}
     process.exit(0);
   } catch (err) {
     console.error('❌ Error:', err.message);
+    try { await db.pool.end(); } catch (_) {}
     process.exit(1);
   }
 }

@@ -36,9 +36,11 @@ const db = require('../config/db');
       console.log('ℹ️ Las 4 columnas ya existen en proyectos.');
     }
     console.log('Migración de campos de ficha técnica completada.');
+    try { await db.pool.end(); } catch (_) {}
     process.exit(0);
   } catch (err) {
     console.error('❌ Error en la migración:', err.message);
+    try { await db.pool.end(); } catch (_) {}
     process.exit(1);
   }
 })();

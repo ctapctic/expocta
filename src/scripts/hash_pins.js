@@ -30,10 +30,12 @@ async function migrate() {
   }
 
   console.log(`Migración completada: ${actualizadas} PIN(s) convertidos a bcrypt.`);
+  try { await db.pool.end(); } catch (_) {}
   process.exit(0);
 }
 
-migrate().catch(err => {
+migrate().catch(async (err) => {
   console.error('Error en la migración:', err.message);
+  try { await db.pool.end(); } catch (_) {}
   process.exit(1);
 });

@@ -44,14 +44,18 @@ function renderCharlas(charlas) {
     return;
   }
 
+  function fmtFechaHora(iso) {
+    if (!iso) return '—';
+    const s = String(iso).replace('T', ' ').replace('.000Z', '').replace('Z', '');
+    const [fecha, hora] = s.split(' ');
+    if (!fecha || !hora) return s;
+    const [a, m, d] = fecha.split('-');
+    const [h, min] = hora.split(':');
+    return `${d}/${m}/${a} ${h}:${min}`;
+  }
+
   container.innerHTML = charlas.map(c => {
-    const fechaHora = new Date(c.horario).toLocaleString('es-ES', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    const fechaHora = fmtFechaHora(c.horario_str || c.horario);
 
     return `
       <div class="col-md-6 mb-4">

@@ -43,9 +43,11 @@ const MAP_ESPECIALIDAD = [
     console.log('Resumen de especialidades:',
       JSON.stringify(resumen.map(r => ({ especialidad: r.especialidad, total: String(r.total) }))));
     console.log('Migración completada.');
+    try { await db.pool.end(); } catch (_) {}
     process.exit(0);
   } catch (err) {
     console.error('❌ Error en la migración:', err.message);
+    try { await db.pool.end(); } catch (_) {}
     process.exit(1);
   }
 })();

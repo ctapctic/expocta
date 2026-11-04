@@ -298,6 +298,7 @@ async function main() {
     console.error(err.stack);
     process.exitCode = 1;
   } finally {
+    try { await db.pool.end(); } catch (_) {}
     process.exit();
   }
 }

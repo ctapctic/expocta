@@ -251,11 +251,12 @@
     }
 
     function charlaItem(c, rank) {
-      const dt = c.horario ? new Date(c.horario) : null;
-      const when = dt
-        ? `${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`
-        : '--:--';
-      const day = dt ? dt.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+      // horario_str llega como "YYYY-MM-DD HH:MM:SS" (hora local sin zona): se usa tal cual.
+      const hs = c.horario_str || '';
+      const when = hs ? hs.slice(11, 16) : '--:--';
+      const day = hs
+        ? new Date(`${hs.slice(0, 10)}T12:00:00`).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })
+        : '';
       const rankBadge = rank ? `<span class="tick-badge me-1">#${rank}</span>` : '';
       const notaPill = c.total_votos > 0
         ? `<span class="feed-score-pill"><i class="bi bi-star-fill me-1" style="font-size:0.6rem;"></i>${Number(c.promedio).toFixed(1)}</span>`

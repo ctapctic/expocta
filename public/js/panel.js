@@ -203,7 +203,7 @@ async function loadPanelCharlas() {
           <div class="p-3 bg-white rounded-3 border shadow-sm h-100 d-flex flex-column">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <span class="badge bg-dark">${c.codigo_charla}</span>
-              <span class="small text-info"><i class="bi bi-clock me-1"></i>${new Date(c.horario).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+              <span class="small text-info"><i class="bi bi-clock me-1"></i>${(c.horario_str || '').slice(11, 16) || new Date(c.horario).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
             </div>
             <h6 class="fw-bold text-dark mb-1">${c.titulo}</h6>
             <div class="d-flex align-items-center gap-2 mb-2">

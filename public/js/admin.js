@@ -206,11 +206,11 @@ const CRUD_ENTIDADES = {
       { titulo: 'Código', campo: 'codigo_charla' },
       { titulo: 'Título', campo: 'titulo' },
       { titulo: 'Expositor', campo: 'expositor' },
-      { titulo: 'Horario', campo: 'horario', fmt: fmtHorario },
+      { titulo: 'Horario', campo: 'horario_str', fmt: fmtHorario },
       { titulo: 'Ubicación', campo: 'ubicacion' }
     ],
     campos: ['codigo_charla', 'titulo', 'eje_tematico', 'expositor', 'biografia_expositor', 'horario', 'ubicacion'],
-    transformIn: { horario: isoADatetimeLocal },
+    transformIn: { horario: (v, row) => isoADatetimeLocal(row.horario_str || v) },
     archivos: { diapositivas_pdf: (r) => r.diapositivas_pdf_url, foto_expositor: (r) => r.foto_expositor_url }
   },
   empresas: {
@@ -242,13 +242,23 @@ const datosActuales = { proyectos: [], ofertas: [], charlas: [], empresas: [] };
 
 function fmtHorario(value) {
   if (!value) return '—';
-  const d = new Date(value);
-  if (isNaN(d.getTime())) return String(value);
+  const s = String(value);
+  // Las charlas llegan como "YYYY-MM-DD HH:MM:SS" (hora tal cual se guardó):
+  // se formatean sin pasar por Date para no desplazar la zona horaria.
+  const m = s.endsWith('Z') ? null : s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+  if (m) return `${m[3]}/${m[2]}/${m[1].slice(2)} ${m[4]}:${m[5]}`;
+  const d = new Date(s);
+  if (isNaN(d.getTime())) return s;
   return d.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
 function isoADatetimeLocal(value) {
   if (!value) return '';
+  // Si ya viene como "YYYY-MM-DD HH:MM:SS", usar esos valores sin conversión de zona.
+  const m = String(value).endsWith('Z')
+    ? null
+    : String(value).match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+  if (m) return `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}`;
   const d = new Date(value);
   if (isNaN(d.getTime())) return '';
   const pad = (n) => String(n).padStart(2, '0');
@@ -333,7 +343,7 @@ window.editarEntidad = function (entidad, id) {
   cfg.campos.forEach((campo) => {
     const input = form.elements[campo];
     if (!input) return;
-    const valor = cfg.transformIn && cfg.transformIn[campo] ? cfg.transformIn[campo](r[campo]) : r[campo];
+    const valor = cfg.transformIn && cfg.transformIn[campo] ? cfg.transformIn[campo](r[campo], r) : r[campo];
 
     // Checkboxes múltiples (requerimientos_exhibicion): marcar los que coincidan con el valor guardado
     if (campo === 'requerimientos_exhibicion' && input.length !== undefined) {

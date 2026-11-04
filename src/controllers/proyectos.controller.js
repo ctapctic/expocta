@@ -217,6 +217,7 @@ exports.obtenerLeaderboard = async (req, res, next) => {
         c.expositor,
         c.foto_expositor_url,
         c.horario,
+        DATE_FORMAT(c.horario, '%Y-%m-%d %H:%i:%s') AS horario_str,
         c.ubicacion,
         COALESCE(AVG((v.nota_contenido + v.nota_expositor)/2.0), 0) AS promedio,
         COUNT(v.id) AS total_votos
@@ -237,6 +238,7 @@ exports.obtenerLeaderboard = async (req, res, next) => {
         c.expositor,
         c.foto_expositor_url,
         c.horario,
+        DATE_FORMAT(c.horario, '%Y-%m-%d %H:%i:%s') AS horario_str,
         AVG((v.nota_contenido + v.nota_expositor)/2.0) AS promedio,
         COUNT(v.id) AS total_votos
       FROM charlas c
@@ -301,6 +303,7 @@ exports.obtenerLeaderboard = async (req, res, next) => {
         expositor: c.expositor,
         foto_expositor_url: c.foto_expositor_url || '',
         horario: c.horario,
+        horario_str: c.horario_str,
         ubicacion: c.ubicacion,
         promedio: Number(parseFloat(c.promedio || 0).toFixed(2)),
         total_votos: Number(c.total_votos || 0)
@@ -312,6 +315,7 @@ exports.obtenerLeaderboard = async (req, res, next) => {
         expositor: c.expositor,
         foto_expositor_url: c.foto_expositor_url || '',
         horario: c.horario,
+        horario_str: c.horario_str,
         promedio: Number(parseFloat(c.promedio || 0).toFixed(2)),
         total_votos: Number(c.total_votos || 0)
       })),
