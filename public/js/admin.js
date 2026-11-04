@@ -159,7 +159,14 @@ const CRUD_ENTIDADES = {
       { titulo: 'Título', campo: 'titulo' },
       { titulo: 'Especialidad', campo: 'especialidad', badge: 'bg-secondary' },
       { titulo: 'Aplicación', campo: 'sector_aplicacion' },
-      { titulo: 'Promedio', campo: 'promedio', badge: 'bg-warning text-dark' }
+      { titulo: 'Promedio', campo: 'promedio', badge: 'bg-warning text-dark' },
+      {
+        titulo: 'Foto',
+        campo: 'imagen_ok',
+        html: (r) => (r.imagen_ok
+          ? '<span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-lg me-1"></i>OK</span>'
+          : '<span class="badge bg-danger-subtle text-danger border border-danger-subtle"><i class="bi bi-exclamation-triangle me-1"></i>Falta</span>')
+      }
     ],
     campos: ['codigo_stand', 'titulo', 'especialidad', 'sector_aplicacion', 'impacto_ods', 'resumen_ejecutivo', 'problema_que_resuelve', 'trl_nivel', 'tecnologias_usadas', 'integrantes', 'docente_tutor', 'video_pitch_url', 'enlace_tecnico_url', 'requerimientos_exhibicion'],
     archivos: { imagen: (r) => r.imagen_url, pdf_poster: (r) => r.pdf_poster_url }
@@ -304,6 +311,7 @@ function renderListado(entidad, cfg, registros) {
   const filas = registros.map((r) => `
     <tr>
       ${cfg.columnas.map((c) => {
+        if (typeof c.html === 'function') return `<td>${c.html(r)}</td>`;
         const v = typeof c.fmt === 'function' ? c.fmt(r[c.campo], r) : r[c.campo];
         const texto = (v === null || v === undefined || v === '') ? '—' : esc(v);
         return c.badge
@@ -317,7 +325,22 @@ function renderListado(entidad, cfg, registros) {
     </tr>
   `).join('');
 
+  // Aviso de fotos faltantes en el listado de proyectos
+  let resumen = '';
+  if (entidad === 'proyectos' && registros.some((r) => 'imagen_ok' in r)) {
+    const faltan = registros.filter((r) => !r.imagen_ok).length;
+    resumen = faltan > 0
+      ? `<div class="alert alert-warning d-flex align-items-center gap-2 py-2 px-3 small mb-0">
+           <i class="bi bi-exclamation-triangle-fill"></i>
+           <span>${faltan} proyecto(s) sin foto disponible. Editá cada uno y volvé a subir la imagen.</span>
+         </div>`
+      : `<div class="alert alert-success py-2 px-3 small mb-0">
+           <i class="bi bi-check-circle-fill me-1"></i>Todas las fotos están disponibles.
+         </div>`;
+  }
+
   cont.innerHTML = `
+    ${resumen}
     <table class="table table-hover align-middle mb-0 small">
       <thead class="table-light"><tr>${ths}</tr></thead>
       <tbody>${filas}</tbody>
