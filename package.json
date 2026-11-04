@@ -1,0 +1,31 @@
+{
+  "name": "expotecnia-eftp",
+  "version": "1.0.0",
+  "description": "Plataforma Web 100% Online para Expotecnia de EFTP con MariaDB, Express",
+  "main": "src/app.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js",
+    "generate-brochure": "node src/scripts/generate_brochure.js"
+  },
+  "keywords": [
+    "eftp",
+    "expotecnia",
+    "express",
+    "mariadb",
+    "online"
+  ],
+  "author": "Full-Stack Senior Engineer",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.22.3",
+    "mariadb": "^3.4.0",
+    "multer": "^1.4.5-lts.1",
+    "pdfkit": "^0.20.2",
+    "qrcode": "^1.5.4"
+  }
+}

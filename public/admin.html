@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración - Expotecnia EFTP</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+
+  
+</head>
+<body class="bg-light">
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+        <i class="bi bi-cpu-fill fs-3 text-info"></i>
+        <span>EXPOTECNIA<span class="text-white">EFTP</span></span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="panel.html"><i class="bi bi-grid-1x2-fill me-1"></i>Portal Visitante</a></li>
+          <li class="nav-item"><a class="nav-link" href="proyectos.html"><i class="bi bi-diagram-3 me-1"></i>Proyectos</a></li>
+          <li class="nav-item"><a class="nav-link" href="ofertas.html"><i class="bi bi-mortarboard me-1"></i>Oferta EFTP</a></li>
+          <li class="nav-item"><a class="nav-link" href="charlas.html"><i class="bi bi-mic me-1"></i>Charlas</a></li>
+          <li class="nav-item"><a class="nav-link" href="empresas.html"><i class="bi bi-building me-1"></i>Empresas</a></li>
+          <li class="nav-item" id="nav-admin-item"><a class="nav-link active" href="admin.html"><i class="bi bi-speedometer2 me-1"></i>Panel Admin</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-info btn-sm rounded-pill" onclick="openQRScannerModal()">
+            <i class="bi bi-qr-code-scan me-1"></i>Escanear QR Stand
+          </button>
+          <button id="user-profile-btn" class="btn btn-primary btn-sm rounded-pill" onclick="showAuthModal()">
+            <i class="bi bi-person-circle me-1"></i>Ingresar
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="container my-4 flex-grow-1">
+    
+    <!-- HEADER DEL PANEL ADMIN -->
+    <div class="card card-custom p-4 border-0 shadow-sm mb-4 bg-white">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+          <h2 class="fw-bold mb-1 text-dark"><i class="bi bi-speedometer2 text-danger me-2"></i>Panel de Control &amp; Gestión Institucional</h2>
+          <p class="text-muted small mb-0">Administración de proyectos, stands, empresas, conferencias y carga de archivos Multer.</p>
+        </div>
+        <div class="d-flex flex-column align-items-end gap-2">
+          <a href="config.html" id="btn-config-sistema" class="btn btn-sm btn-outline-warning d-none">
+            <i class="bi bi-gear-wide-connected me-1"></i>Configuración del Sistema
+          </a>
+          <div id="admin-user-badge" class="p-2 bg-light rounded-3 border text-end">
+            <span class="badge bg-danger fs-6 me-2">ADMIN</span> Validando sesión...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ESTADÍSTICAS RÁPIDAS -->
+    <div class="row mb-4" id="admin-stats">
+      <!-- Carga dinámica -->
+    </div>
+
+    <!-- PESTAÑAS DE ADMINISTRACIÓN -->
+    <div class="card card-custom border-0 shadow-sm rounded-4">
+      <div class="card-header bg-white border-bottom-0 pt-3">
+        <ul class="nav nav-tabs card-header-tabs" id="adminTab" role="tablist">
+          <li class="nav-item">
+            <button class="nav-link active fw-bold" id="ranking-tab" data-bs-toggle="tab" data-bs-target="#tab-ranking">
+              <i class="bi bi-trophy me-1"></i>Ranking Live
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-bold text-primary" id="proyectos-tab" data-bs-toggle="tab" data-bs-target="#tab-proyectos">
+              <i class="bi bi-plus-circle-fill me-1"></i>Nuevo Stand / Proyecto
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-bold text-success" id="ofertas-tab" data-bs-toggle="tab" data-bs-target="#tab-ofertas">
+              <i class="bi bi-mortarboard me-1"></i>Nueva Oferta EFTP
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-bold text-info" id="charlas-tab" data-bs-toggle="tab" data-bs-target="#tab-charlas">
+              <i class="bi bi-mic me-1"></i>Agendar Charla
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link fw-bold text-dark" id="empresas-tab" data-bs-toggle="tab" data-bs-target="#tab-empresas">
+              <i class="bi bi-building me-1"></i>Nueva Empresa
+            </button>
+          </li>
+          <li class="nav-item d-none" id="nav-usuarios-item">
+            <button class="nav-link fw-bold text-danger" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#tab-usuarios">
+              <i class="bi bi-people me-1"></i>Usuarios
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card-body p-4">
+        <div class="tab-content" id="adminTabContent">
+          
+          <!-- TAB 1: RANKING LIVE -->
+          <div class="tab-pane fade show active" id="tab-ranking">
+            <h5 class="fw-bold mb-3">Ranking de Proyectos según Evaluación Promedio</h5>
+            <ul class="list-group shadow-sm" id="top-ranking-list">
+              <li class="list-group-item text-center text-muted">Cargando datos del ranking...</li>
+            </ul>
+          </div>
+
+          <!-- TAB 2: NUEVO PROYECTO -->
+          <div class="tab-pane fade" id="tab-proyectos">
+            <!-- GESTIÓN: LISTADO -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="fw-bold mb-0"><i class="bi bi-list-ul me-1"></i>Proyectos Registrados</h5>
+              <button class="btn btn-sm btn-outline-secondary" onclick="refreshAdminListings()"><i class="bi bi-arrow-clockwise me-1"></i>Actualizar</button>
+            </div>
+            <div class="table-responsive mb-4 border rounded-3" id="lista-proyectos">
+              <div class="p-3 text-center text-muted small">Cargando listado...</div>
+            </div>
+            <hr>
+            <h5 class="fw-bold mb-3" id="titulo-form-proyectos"><i class="bi bi-plus-circle-fill text-primary me-1"></i>Nuevo Stand / Proyecto</h5>
+            <form id="form-add-proyecto" enctype="multipart/form-data">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label fw-bold">Código de Stand (Único)</label>
+                  <input type="text" name="codigo_stand" class="form-control" placeholder="STAND-104" required>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label fw-bold">Título del Proyecto</label>
+                  <input type="text" name="titulo" class="form-control" placeholder="Sistema de..." required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Especialidad</label>
+                  <select name="especialidad" class="form-select" required>
+                    <option value="TIC">TIC</option>
+                    <option value="MECATRÓNICA">MECATRÓNICA</option>
+                    <option value="DISEÑO DE MODA">DISEÑO DE MODA</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Sector de Aplicación (tipo de empresa)</label>
+                  <input type="text" name="sector_aplicacion" class="form-control" maxlength="255" placeholder="Ej: Agroindustria, pymes de logística, hospitales...">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Nivel TRL (1 a 9)</label>
+                  <input type="number" name="trl_nivel" class="form-control" min="1" max="9" value="6" required>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label fw-bold">Docente Tutor</label>
+                  <input type="text" name="docente_tutor" class="form-control" placeholder="Ing. Juan Pérez">
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-bold">Resumen Ejecutivo</label>
+                  <textarea name="resumen_ejecutivo" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-bold">Problema que Resuelve</label>
+                  <textarea name="problema_que_resuelve" class="form-control" rows="2" placeholder="¿Qué necesidad o problemática del sector socioproductivo aborda este proyecto?"></textarea>
+                  <small class="form-text text-muted">Opcional. Breve descripción de la problemática que resuelve.</small>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Tecnologías Usadas</label>
+                  <input type="text" name="tecnologias_usadas" class="form-control" placeholder="Node.js, ESP32, MariaDB...">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Integrantes (Alumnos)</label>
+                  <input type="text" name="integrantes" class="form-control" placeholder="Carlos, Sofía, Mateo">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Impacto / ODS Principal</label>
+                  <select name="impacto_ods" class="form-select">
+                    <option value="">Seleccionar...</option>
+                    <option value="Innovación">Innovación</option>
+                    <option value="Eficiencia energética">Eficiencia energética</option>
+                    <option value="Sostenibilidad textil">Sostenibilidad textil</option>
+                    <option value="Impacto social">Impacto social</option>
+                    <option value="Impacto económico">Impacto económico</option>
+                    <option value="ODS 3: Salud y bienestar">ODS 3: Salud y bienestar</option>
+                    <option value="ODS 4: Educación de calidad">ODS 4: Educación de calidad</option>
+                    <option value="ODS 8: Trabajo decente y crecimiento económico">ODS 8: Trabajo decente y crecimiento económico</option>
+                    <option value="ODS 9: Industria, innovación e infraestructura">ODS 9: Industria, innovación e infraestructura</option>
+                    <option value="ODS 11: Ciudades y comunidades sostenibles">ODS 11: Ciudades y comunidades sostenibles</option>
+                    <option value="ODS 12: Producción y consumo responsables">ODS 12: Producción y consumo responsables</option>
+                    <option value="ODS 13: Acción por el clima">ODS 13: Acción por el clima</option>
+                  </select>
+                  <small class="form-text text-muted">Opcional. Objetivo de desarrollo sostenible o tipo de impacto principal.</small>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Requerimientos de Exhibición</label>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="requerimientos_exhibicion" value="Conexión a Internet">
+                    <label class="form-check-label small">Conexión a Internet</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="requerimientos_exhibicion" value="Energía eléctrica estándar">
+                    <label class="form-check-label small">Energía eléctrica estándar</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="requerimientos_exhibicion" value="Energía eléctrica especial">
+                    <label class="form-check-label small">Energía eléctrica especial</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="requerimientos_exhibicion" value="Espacio físico extra">
+                    <label class="form-check-label small">Espacio físico extra</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="requerimientos_exhibicion" value="Pantalla / TV">
+                    <label class="form-check-label small">Pantalla / TV</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="requerimientos_exhibicion" value="Sonido / micrófono">
+                    <label class="form-check-label small">Sonido / micrófono</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="requerimientos_exhibicion" value="Mesa adicional">
+                    <label class="form-check-label small">Mesa adicional</label>
+                  </div>
+                  <small class="form-text text-muted">Opcional. Necesidades logísticas para el stand físico.</small>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Imagen Ilustrativa (JPG, PNG)</label>
+                  <input type="file" name="imagen" class="form-control" accept="image/*">
+                  <small class="form-text text-muted d-none" id="hint-imagen-proyectos"></small>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Poster Ficha Técnica (PDF)</label>
+                  <input type="file" name="pdf_poster" class="form-control" accept="application/pdf">
+                  <small class="form-text text-muted d-none" id="hint-pdf_poster-proyectos"></small>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">URL Video Pitch (YouTube embed optional)</label>
+                  <input type="url" name="video_pitch_url" class="form-control" placeholder="https://www.youtube.com/embed/...">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">URL Enlace Técnico / Demo (opcional)</label>
+                  <input type="url" name="enlace_tecnico_url" class="form-control" placeholder="https://github.com/... o https://mi-proyecto.app/...">
+                  <small class="form-text text-muted">Opcional. Repositorio, prototipo PWA, simulación CAD o portafolio digital.</small>
+                </div>
+                <div class="col-12 text-end">
+                  <button type="button" class="btn btn-outline-secondary me-2 d-none" id="btn-cancel-proyectos" onclick="cancelarEdicion('proyectos')">Cancelar edición</button>
+                  <button type="submit" class="btn btn-primary fw-bold px-4" id="btn-submit-proyectos">
+                    <i class="bi bi-cloud-upload me-1"></i>Guardar Proyecto
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- TAB 3: NUEVA OFERTA EFTP -->
+          <div class="tab-pane fade" id="tab-ofertas">
+            <!-- GESTIÓN: LISTADO -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="fw-bold mb-0"><i class="bi bi-list-ul me-1"></i>Ofertas Registradas</h5>
+              <button class="btn btn-sm btn-outline-secondary" onclick="refreshAdminListings()"><i class="bi bi-arrow-clockwise me-1"></i>Actualizar</button>
+            </div>
+            <div class="table-responsive mb-4 border rounded-3" id="lista-ofertas">
+              <div class="p-3 text-center text-muted small">Cargando listado...</div>
+            </div>
+            <hr>
+            <h5 class="fw-bold mb-3" id="titulo-form-ofertas"><i class="bi bi-plus-circle-fill text-success me-1"></i>Nueva Oferta EFTP</h5>
+            <form id="form-add-oferta" enctype="multipart/form-data">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label fw-bold">Código Oferta</label>
+                  <input type="text" name="codigo_oferta" class="form-control" placeholder="OFERTA-AUTO" required>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label fw-bold">Nombre de la Carrera</label>
+                  <input type="text" name="nombre_carrera" class="form-control" placeholder="Tecnicatura Superior en..." required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Duración (Horas)</label>
+                  <input type="number" name="duracion_horas" class="form-control" placeholder="2400" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Modalidad</label>
+                  <select name="modalidad" class="form-select">
+                    <option value="Presencial">Presencial</option>
+                    <option value="Híbrida">Híbrida</option>
+                    <option value="Dual Empresa-Centro">Dual Empresa-Centro</option>
+                  </select>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-bold">Perfil de Egreso</label>
+                  <textarea name="perfil_egreso" class="form-control" rows="2" required></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-bold">Requisitos de Admisión</label>
+                  <textarea name="requisitos_admision" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-bold">Brochure Informativo (PDF)</label>
+                  <input type="file" name="brochure_pdf" class="form-control" accept="application/pdf">
+                  <small class="form-text text-muted d-none" id="hint-brochure_pdf-ofertas"></small>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-bold">URL Video Recorrido Laboratorio</label>
+                  <input type="url" name="video_lab_url" class="form-control" placeholder="https://...">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-bold">Link de Información</label>
+                  <input type="url" name="link_informacion_url" class="form-control" placeholder="https://sitio.edu/oferta">
+                  <small class="form-text text-muted">Página externa con información ampliada de la carrera.</small>
+                </div>
+                <div class="col-12 text-end">
+                  <button type="button" class="btn btn-outline-secondary me-2 d-none" id="btn-cancel-ofertas" onclick="cancelarEdicion('ofertas')">Cancelar edición</button>
+                  <button type="submit" class="btn btn-success fw-bold px-4" id="btn-submit-ofertas">
+                    <i class="bi bi-cloud-upload me-1"></i>Guardar Oferta
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- TAB 4: AGENDAR CHARLA -->
+          <div class="tab-pane fade" id="tab-charlas">
+            <!-- GESTIÓN: LISTADO -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="fw-bold mb-0"><i class="bi bi-list-ul me-1"></i>Charlas Agendadas</h5>
+              <button class="btn btn-sm btn-outline-secondary" onclick="refreshAdminListings()"><i class="bi bi-arrow-clockwise me-1"></i>Actualizar</button>
+            </div>
+            <div class="table-responsive mb-4 border rounded-3" id="lista-charlas">
+              <div class="p-3 text-center text-muted small">Cargando listado...</div>
+            </div>
+            <hr>
+            <h5 class="fw-bold mb-3" id="titulo-form-charlas"><i class="bi bi-plus-circle-fill text-info me-1"></i>Agendar Charla</h5>
+            <form id="form-add-charla" enctype="multipart/form-data">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label fw-bold">Código Charla</label>
+                  <input type="text" name="codigo_charla" class="form-control" placeholder="CHARLA-03" required>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label fw-bold">Título de la Ponencia</label>
+                  <input type="text" name="titulo" class="form-control" placeholder="Innovación en..." required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Eje Temático</label>
+                  <input type="text" name="eje_tematico" class="form-control" placeholder="Inteligencia Artificial / Energías">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Expositor / Disertante</label>
+                  <input type="text" name="expositor" class="form-control" placeholder="Dr. Carlos..." required>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label fw-bold">Biografía Breve del Expositor</label>
+                  <textarea name="biografia_expositor" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-bold">Foto del Expositor</label>
+                  <input type="file" name="foto_expositor" class="form-control" accept="image/*">
+                  <small class="form-text text-muted d-none" id="hint-foto_expositor-charlas"></small>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Fecha y Horario</label>
+                  <input type="datetime-local" name="horario" class="form-control" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Ubicación / Aula</label>
+                  <input type="text" name="ubicacion" class="form-control" placeholder="Auditorio Principal" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-bold">Presentación / Diapositivas (PDF)</label>
+                  <input type="file" name="diapositivas_pdf" class="form-control" accept="application/pdf">
+                  <small class="form-text text-muted d-none" id="hint-diapositivas_pdf-charlas"></small>
+                </div>
+                <div class="col-12 text-end">
+                  <button type="button" class="btn btn-outline-secondary me-2 d-none" id="btn-cancel-charlas" onclick="cancelarEdicion('charlas')">Cancelar edición</button>
+                  <button type="submit" class="btn btn-info text-white fw-bold px-4" id="btn-submit-charlas">
+                    <i class="bi bi-calendar-plus me-1"></i>Agendar Charla
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- TAB 5: NUEVA EMPRESA -->
+          <div class="tab-pane fade" id="tab-empresas">
+            <!-- GESTIÓN: LISTADO -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="fw-bold mb-0"><i class="bi bi-list-ul me-1"></i>Empresas Registradas</h5>
+              <button class="btn btn-sm btn-outline-secondary" onclick="refreshAdminListings()"><i class="bi bi-arrow-clockwise me-1"></i>Actualizar</button>
+            </div>
+            <div class="table-responsive mb-4 border rounded-3" id="lista-empresas">
+              <div class="p-3 text-center text-muted small">Cargando listado...</div>
+            </div>
+            <hr>
+            <h5 class="fw-bold mb-3" id="titulo-form-empresas"><i class="bi bi-plus-circle-fill text-dark me-1"></i>Nueva Empresa</h5>
+            <form id="form-add-empresa" enctype="multipart/form-data">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label fw-bold">Código Empresa</label>
+                  <input type="text" name="codigo_empresa" class="form-control" placeholder="EMP-03" required>
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label fw-bold">Nombre Corporativo</label>
+                  <input type="text" name="nombre_corporativo" class="form-control" placeholder="Empresa SA" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label fw-bold">Descripción Corporativa</label>
+                  <textarea name="descripcion" class="form-control" rows="2" required></textarea>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Ofertas de Pasantías</label>
+                  <textarea name="ofertas_pasantia" class="form-control" rows="2" placeholder="2 vacantes para..."></textarea>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Requisitos del Perfil</label>
+                  <textarea name="requisitos_perfil" class="form-control" rows="2" placeholder="Estudiantes de término..."></textarea>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Logo de Empresa (JPG, PNG)</label>
+                  <input type="file" name="logo" class="form-control" accept="image/*">
+                  <small class="form-text text-muted d-none" id="hint-logo-empresas"></small>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label fw-bold">Catálogo Corporativo (PDF)</label>
+                  <input type="file" name="catalogo_pdf" class="form-control" accept="application/pdf">
+                  <small class="form-text text-muted d-none" id="hint-catalogo_pdf-empresas"></small>
+                </div>
+                <div class="col-12 text-end">
+                  <button type="button" class="btn btn-outline-secondary me-2 d-none" id="btn-cancel-empresas" onclick="cancelarEdicion('empresas')">Cancelar edición</button>
+                  <button type="submit" class="btn btn-dark fw-bold px-4" id="btn-submit-empresas">
+                    <i class="bi bi-building-add me-1"></i>Guardar Empresa
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- TAB 6: GESTIÓN DE USUARIOS (solo administrador) -->
+          <div class="tab-pane fade" id="tab-usuarios">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="fw-bold mb-0"><i class="bi bi-people me-1"></i>Usuarios del Sistema</h5>
+              <button class="btn btn-sm btn-outline-secondary" onclick="loadUsuarios()"><i class="bi bi-arrow-clockwise me-1"></i>Actualizar</button>
+            </div>
+            <div class="alert alert-info small py-2">
+              <i class="bi bi-info-circle me-1"></i>
+              Visitantes, alumnos y empresas se registran solos y quedan habilitados. Docentes y administradores solo se crean desde acá.
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-md-4">
+                <input type="text" id="filtro-usuarios-texto" class="form-control form-control-sm" placeholder="Buscar nombre o email..." oninput="renderUsuarios()">
+              </div>
+              <div class="col-md-3">
+                <select id="filtro-usuarios-rol" class="form-select form-select-sm" onchange="renderUsuarios()">
+                  <option value="">Todos los roles</option>
+                  <option value="visitante">Visitante / Evaluador</option>
+                  <option value="alumno">Alumno / Estudiante</option>
+                  <option value="empresa">Empresa</option>
+                  <option value="docente">Docente / Tutor</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <select id="filtro-usuarios-estado" class="form-select form-select-sm" onchange="renderUsuarios()">
+                  <option value="">Todos los estados</option>
+                  <option value="habilitado">Habilitados</option>
+                  <option value="pendiente">Pendientes</option>
+                  <option value="deshabilitado">Deshabilitados</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-responsive mb-4 border rounded-3" id="lista-usuarios">
+              <div class="p-3 text-center text-muted small">Cargando usuarios...</div>
+            </div>
+            <hr>
+            <h5 class="fw-bold mb-3"><i class="bi bi-person-plus-fill text-danger me-1"></i>Crear Usuario</h5>
+            <form id="form-usuarios">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label fw-bold">Nombre Completo</label>
+                  <input type="text" name="nombre" class="form-control" placeholder="Ing. María Docente" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-bold">Correo Electrónico</label>
+                  <input type="email" name="email" class="form-control" placeholder="docente@instituto.edu" required>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label fw-bold">Rol</label>
+                  <select name="rol" class="form-select" required>
+                    <option value="docente">Docente / Tutor</option>
+                    <option value="admin">Administrador General</option>
+                    <option value="visitante">Visitante / Evaluador</option>
+                    <option value="alumno">Alumno / Estudiante</option>
+                    <option value="empresa">Empresa</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label fw-bold">PIN Inicial</label>
+                  <input type="text" name="codigo_pin" class="form-control" placeholder="Opcional" maxlength="10">
+                </div>
+                <div class="col-12 text-end">
+                  <button type="submit" class="btn btn-danger fw-bold px-4">
+                    <i class="bi bi-person-plus me-1"></i>Crear Usuario
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- BOTÓN FLOTANTE QR SCANNER -->
+  <button class="fab-qr" onclick="openQRScannerModal()" title="Escanear Código QR de Stand">
+    <i class="bi bi-qr-code-scan"></i>
+  </button>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container text-center">
+      <p class="mb-1 text-white fw-bold">Expotecnia de Educación Formativo-Técnica Profesional (EFTP)</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="js/app.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

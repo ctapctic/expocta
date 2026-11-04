@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal del Visitante (Todo en Uno) - Expotecnia EFTP</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+
+  
+</head>
+<body class="bg-light">
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+        <i class="bi bi-cpu-fill fs-3 text-info"></i>
+        <span>EXPOTECNIA<span class="text-white">EFTP</span></span>
+      </a>
+      <div class="d-none ms-lg-3" data-logos-institucionales></div>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link active" href="panel.html"><i class="bi bi-grid-1x2-fill me-1 text-warning"></i>Mi Panel Todo en Uno</a></li>
+          <li class="nav-item"><a class="nav-link" href="proyectos.html"><i class="bi bi-diagram-3 me-1"></i>Proyectos</a></li>
+          <li class="nav-item"><a class="nav-link" href="ofertas.html"><i class="bi bi-mortarboard me-1"></i>Oferta EFTP</a></li>
+          <li class="nav-item"><a class="nav-link" href="charlas.html"><i class="bi bi-mic me-1"></i>Charlas</a></li>
+          <li class="nav-item"><a class="nav-link" href="empresas.html"><i class="bi bi-building me-1"></i>Empresas</a></li>
+          <li class="nav-item"><a class="nav-link" href="leaderboard.html"><i class="bi bi-trophy me-1"></i>Leaderboard</a></li>
+        </ul>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-outline-info btn-sm rounded-pill" onclick="openQRScannerModal()">
+            <i class="bi bi-qr-code-scan me-1"></i>Escanear QR Stand
+          </button>
+          <button id="user-profile-btn" class="btn btn-primary btn-sm rounded-pill" onclick="showAuthModal()">
+            <i class="bi bi-person-circle me-1"></i>Ingresar
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENIDO PRINCIPAL: PORTAL TODO EN UNO -->
+  <main class="container my-4 flex-grow-1">
+    
+    <!-- 1. CREDENCIAL Y BIENVENIDA AL VISITANTE -->
+    <div class="card card-custom border-0 shadow-sm mb-4 bg-white overflow-hidden">
+      <div class="card-body p-4">
+        <div class="row align-items-center g-3">
+          <div class="col-md-7">
+            <div class="d-flex align-items-center gap-3">
+              <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 60px; height: 60px; font-size: 1.8rem;">
+                <i class="bi bi-person-badge"></i>
+              </div>
+              <div>
+                <span class="badge bg-primary-subtle text-primary fw-bold text-uppercase mb-1" id="visitor-role-badge">Visitante / Evaluador</span>
+                <h3 class="fw-bold mb-0 text-dark" id="visitor-name">Cargando perfil...</h3>
+                <p class="text-muted small mb-0" id="visitor-email">Identifícate con tu email o PIN</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-5 text-md-end">
+            <div class="d-inline-flex gap-2 bg-light p-2 rounded-3 border align-items-center">
+              <span class="small text-muted fw-bold">PIN Personal:</span>
+              <code class="fs-5 text-primary fw-bold" id="visitor-pin">----</code>
+              <button onclick="showAuthModal()" class="btn btn-sm btn-outline-primary ms-2">Cambiar / Ingresar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. MÉTRICAS GLOBALES DEL EVENTO EN VIVO -->
+    <div class="row g-3 mb-4" id="event-global-stats">
+      <div class="col-6 col-md-3">
+        <div class="p-3 bg-white border rounded-4 text-center shadow-sm">
+          <div class="fs-2 text-primary mb-0"><i class="bi bi-diagram-3-fill"></i></div>
+          <h3 class="fw-bold mb-0 text-dark" id="stat-proyectos">--</h3>
+          <span class="small text-muted">Stands Expositores</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="p-3 bg-white border rounded-4 text-center shadow-sm">
+          <div class="fs-2 text-warning mb-0"><i class="bi bi-star-fill"></i></div>
+          <h3 class="fw-bold mb-0 text-dark" id="stat-evaluaciones">--</h3>
+          <span class="small text-muted">Votos Emitidos</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="p-3 bg-white border rounded-4 text-center shadow-sm">
+          <div class="fs-2 text-info mb-0"><i class="bi bi-mic-fill"></i></div>
+          <h3 class="fw-bold mb-0 text-dark" id="stat-charlas">--</h3>
+          <span class="small text-muted">Conferencias</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="p-3 bg-white border rounded-4 text-center shadow-sm">
+          <div class="fs-2 text-success mb-0"><i class="bi bi-mortarboard-fill"></i></div>
+          <h3 class="fw-bold mb-0 text-dark" id="stat-ofertas">--</h3>
+          <span class="small text-muted">Carreras EFTP</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. BARRA RÁPIDA DE ESCANEO QR Y BÚSQUEDA DE STAND -->
+    <div class="card border-0 bg-dark text-white rounded-4 p-3 mb-4 shadow">
+      <div class="row align-items-center g-2">
+        <div class="col-md-4">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-qr-code-scan fs-2 text-info"></i>
+            <div>
+              <h6 class="fw-bold mb-0 text-white">¿Estás en un Stand?</h6>
+              <span class="small text-muted">Ingresa el código o escanea</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-8">
+          <div class="input-group">
+            <input type="text" id="visitor-quick-stand" class="form-control form-control-lg text-uppercase fw-bold" placeholder="Ej: STAND-101">
+            <button onclick="irAEvaluarStandRapido()" class="btn btn-info text-dark fw-bold px-4">
+              <i class="bi bi-star-fill me-1"></i>Evaluar Stand Ahora
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. PANEL TODO EN UNO CON PESTAÑAS DÍNAMICAS -->
+    <div class="card card-custom border-0 shadow-sm rounded-4">
+      <div class="card-header bg-white border-bottom-0 pt-3">
+        <ul class="nav nav-pills nav-fill gap-2" id="visitorTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold py-2" id="tab-btn-feed" data-bs-toggle="tab" data-bs-target="#tab-sec-feed" type="button">
+              <i class="bi bi-activity me-1 text-danger"></i>Actividad en Vivo
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold py-2" id="tab-btn-proyectos" data-bs-toggle="tab" data-bs-target="#tab-sec-proyectos" type="button">
+              <i class="bi bi-diagram-3 me-1"></i>Stands &amp; Proyectos
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold py-2" id="tab-btn-charlas" data-bs-toggle="tab" data-bs-target="#tab-sec-charlas" type="button">
+              <i class="bi bi-mic me-1"></i>Conferencias
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold py-2" id="tab-btn-ofertas" data-bs-toggle="tab" data-bs-target="#tab-sec-ofertas" type="button">
+              <i class="bi bi-mortarboard me-1"></i>Carreras EFTP
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold py-2" id="tab-btn-empresas" data-bs-toggle="tab" data-bs-target="#tab-sec-empresas" type="button">
+              <i class="bi bi-building me-1"></i>Pasantías
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold py-2 btn-highlight-historial" id="tab-btn-actividad" data-bs-toggle="tab" data-bs-target="#tab-sec-actividad" type="button">
+              <i class="bi bi-star-fill text-warning me-1"></i>⭐ MI HISTORIAL PERSONAL
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card-body p-4">
+        <div class="tab-content" id="visitorTabContent">
+          
+          <!-- SECCIÓN 0: ACTIVIDAD EN VIVO DEL EVENTO (FEED) -->
+          <div class="tab-pane fade show active" id="tab-sec-feed">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-broadcast text-danger me-2"></i>Feed de Actividad de la Expotecnia en Vivo</h5>
+              <button onclick="loadLiveEventFeed()" class="btn btn-sm btn-outline-danger"><i class="bi bi-arrow-clockwise me-1"></i>Actualizar Feed</button>
+            </div>
+            <div class="list-group list-group-flush border rounded-4 overflow-hidden shadow-sm" id="event-feed-list">
+              <div class="p-4 text-center text-muted">
+                <div class="spinner-border text-danger" role="status"></div>
+                <p class="mt-2 mb-0">Cargando actividad del público...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 1: PROYECTOS Y STANDS -->
+          <div class="tab-pane fade" id="tab-sec-proyectos">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i>Stands Expositores de la Expotecnia</h5>
+              <a href="proyectos.html" class="btn btn-sm btn-outline-primary">Ver con Filtros Avanzados</a>
+            </div>
+            <div class="row" id="panel-proyectos-container">
+              <div class="col-12 text-center py-4 text-muted">
+                <div class="spinner-border text-primary" role="status"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 2: CHARLAS Y CONFERENCIAS -->
+          <div class="tab-pane fade" id="tab-sec-charlas">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-mic-fill text-info me-2"></i>Cronograma de Conferencias &amp; Talleres</h5>
+              <a href="charlas.html" class="btn btn-sm btn-outline-info">Ver Detalle Completo</a>
+            </div>
+            <div class="row" id="panel-charlas-container">
+              <div class="col-12 text-center py-4 text-muted">
+                <div class="spinner-border text-info" role="status"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 3: OFERTA FORMATIVA -->
+          <div class="tab-pane fade" id="tab-sec-ofertas">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-mortarboard-fill text-success me-2"></i>Carreras y Cursos del Centro EFTP</h5>
+              <a href="ofertas.html" class="btn btn-sm btn-outline-success">Ver Folletos</a>
+            </div>
+            <div class="row" id="panel-ofertas-container">
+              <div class="col-12 text-center py-4 text-muted">
+                <div class="spinner-border text-success" role="status"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 4: EMPRESAS Y PASANTÍAS -->
+          <div class="tab-pane fade" id="tab-sec-empresas">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-building-fill text-dark me-2"></i>Red de Empresas Patrocinadoras</h5>
+              <a href="empresas.html" class="btn btn-sm btn-outline-dark">Ver Catálogos</a>
+            </div>
+            <div class="row" id="panel-empresas-container">
+              <div class="col-12 text-center py-4 text-muted">
+                <div class="spinner-border text-dark" role="status"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 5: MI ACTIVIDAD / HISTORIAL PERSONAL DESTACADO -->
+          <div class="tab-pane fade" id="tab-sec-actividad">
+            <div class="historial-card-header mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+              <div>
+                <span class="badge bg-warning text-dark font-monospace fw-bold mb-1">REGISTRO PERSONAL DE ACTIVIDADES</span>
+                <h4 class="fw-bold mb-1 text-white"><i class="bi bi-person-circle text-warning me-2"></i>Mi Historial Personal en la Expotecnia</h4>
+                <p class="text-light opacity-75 small mb-0">Consulta todos tus votos registrados a proyectos, evaluaciones de conferencias y solicitudes de carreras.</p>
+              </div>
+              <button onclick="cargarMiResumenPersonal()" class="btn btn-light btn-sm fw-bold px-3 text-dark rounded-pill">
+                <i class="bi bi-arrow-clockwise me-1"></i>Actualizar Mi Historial
+              </button>
+            </div>
+
+            <div id="panel-actividad-container">
+              <div class="text-center py-4 text-muted">
+                <p>Cargando tu historial personal...</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- BOTÓN FLOTANTE QR SCANNER -->
+  <button class="fab-qr" onclick="openQRScannerModal()" title="Escanear Código QR de Stand">
+    <i class="bi bi-qr-code-scan"></i>
+  </button>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container text-center">
+      <p class="mb-1 text-white fw-bold">Expotecnia de Educación Formativo-Técnica Profesional (EFTP)</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="js/app.js"></script>
+  <script src="js/proyectos.js"></script>
+  <script src="js/ofertas.js"></script>
+  <script src="js/charlas.js"></script>
+  <script src="js/panel.js"></script>
+</body>
+</html>

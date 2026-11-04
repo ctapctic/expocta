@@ -1,0 +1,514 @@
+/* =============================================================================
+   EXPOTECNIA EFTP - CUSTOM DESIGN SYSTEM & STYLESHEET
+   ============================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #2563eb;
+  --primary-hover: #1d4ed8;
+  --secondary-color: #06b6d4;
+  --accent-color: #f59e0b;
+  --dark-bg: #0f172a;
+  --dark-card: #1e293b;
+  --light-bg: #f8fafc;
+  --text-primary: #1e293b;
+  --text-muted: #64748b;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --border-radius-lg: 1rem;
+  --border-radius-xl: 1.5rem;
+  --box-shadow-smooth: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--light-bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6, .brand-font {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* -----------------------------------------------------------------------------
+   NAVBAR & HEADER
+   ----------------------------------------------------------------------------- */
+.navbar-custom {
+  background: rgba(15, 23, 42, 0.95) !important;
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navbar-brand {
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-link {
+  font-weight: 500;
+  color: #cbd5e1 !important;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: #38bdf8 !important;
+}
+
+/* -----------------------------------------------------------------------------
+   OFFLINE CONTINGENCY BANNER
+   ----------------------------------------------------------------------------- */
+#offline-banner {
+  background: linear-gradient(90deg, #d97706 0%, #b45309 100%);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.6rem 1rem;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* -----------------------------------------------------------------------------
+   HERO BANNER & CARDS
+   ----------------------------------------------------------------------------- */
+.hero-gradient {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e1b4b 100%);
+  color: #ffffff;
+  border-radius: var(--border-radius-xl);
+  padding: 3.5rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-gradient::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  pointer-events: none;
+}
+
+.card-custom {
+  border: 1px solid #e2e8f0;
+  border-radius: var(--border-radius-lg);
+  background: #ffffff;
+  box-shadow: var(--box-shadow-smooth);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+  overflow: hidden;
+}
+
+.card-custom:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.12);
+}
+
+.card-img-wrapper {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+.card-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.card-custom:hover .card-img-wrapper img {
+  transform: scale(1.05);
+}
+
+.stand-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+  color: #38bdf8;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+/* -----------------------------------------------------------------------------
+   TRL LEVEL BADGES
+   ----------------------------------------------------------------------------- */
+.trl-badge {
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trl-low { background: #e0f2fe; color: #0369a1; }     /* TRL 1-3 */
+.trl-mid { background: #fef3c7; color: #b45309; }     /* TRL 4-6 */
+.trl-high { background: #dcfce7; color: #15803d; }    /* TRL 7-9 */
+
+/* -----------------------------------------------------------------------------
+   PROJECT BANNER (horizontal card)
+   ----------------------------------------------------------------------------- */
+.project-banner {
+  display: flex;
+  flex-direction: row;
+  min-height: 280px;
+  max-height: 400px;
+}
+
+.project-banner-media {
+  position: relative;
+  background: #0f172a;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-banner-media img {
+  transition: transform 0.5s ease;
+}
+
+.project-banner:hover .project-banner-media img {
+  transform: scale(1.05);
+}
+
+.project-banner-overlay {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  z-index: 2;
+}
+
+.project-video-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.2rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  z-index: 3;
+}
+
+.project-video-btn:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* Responsive: en móviles el banner se apila verticalmente */
+@media (max-width: 767.98px) {
+  .project-banner {
+    flex-direction: column;
+    min-height: auto;
+    max-height: none;
+  }
+  .project-banner-media {
+    height: 220px;
+    min-height: 220px;
+  }
+  .project-banner-overlay {
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   CATÁLOGO DE PROYECTOS (tarjetas compactas, más por fila)
+   ----------------------------------------------------------------------------- */
+.card-catalogo {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.catalogo-img {
+  height: 150px;
+  object-fit: cover;
+  background: #0f172a;
+}
+
+.card-catalogo:hover .catalogo-img {
+  transform: scale(1.05);
+  transition: transform 0.4s ease;
+}
+
+.card-catalogo .stand-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  left: auto;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+  color: #38bdf8;
+  font-weight: 700;
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 16px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  z-index: 2;
+}
+
+.card-catalogo .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.card-catalogo h6 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 0.4rem;
+}
+
+.card-catalogo .badge.small {
+  font-size: 0.7rem;
+}
+
+.card-catalogo .btn.btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.card-catalogo .btn i {
+  font-size: 0.8rem;
+}
+
+/* Desktop: más columnas, imágenes chicas */
+@media (min-width: 992px) {
+  .catalogo-img {
+    height: 140px;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   INTERACTIVE RATING WIDGET (STARS)
+   ----------------------------------------------------------------------------- */
+.star-rating {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  gap: 0.25rem;
+  font-size: 1.6rem;
+}
+
+.star-rating input {
+  display: none;
+}
+
+.star-rating label {
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label,
+.star-rating input:checked ~ label {
+  color: #f59e0b;
+}
+
+.star-rating label:hover {
+  transform: scale(1.15);
+}
+
+/* -----------------------------------------------------------------------------
+   FAB QR SCANNER BUTTON FOR MOBILE
+   ----------------------------------------------------------------------------- */
+.fab-qr {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+  z-index: 1040;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.fab-qr:hover {
+  transform: scale(1.08) rotate(5deg);
+}
+
+/* -----------------------------------------------------------------------------
+   FOOTER
+   ----------------------------------------------------------------------------- */
+footer {
+  margin-top: auto;
+  background: #0f172a;
+  color: #94a3b8;
+  border-top: 1px solid #1e293b;
+  padding: 2.5rem 0 1.5rem;
+}
+
+/* -----------------------------------------------------------------------------
+   PESTAÑAS DEL PANEL: ACTIVIDAD, STANDS, CONFERENCIAS, CARRERAS Y PASANTÍAS
+   Cada pestaña conserva su color de sección, con fondo suave cuando está
+   inactiva y un degradado sólido cuando está activa.
+   ----------------------------------------------------------------------------- */
+#visitorTab .nav-link:not(.btn-highlight-historial) {
+  border-radius: 999px;
+  border: 1px solid var(--tab-border, #cbd5e1);
+  background: var(--tab-soft, #f1f5f9);
+  color: var(--tab-color, #1e293b) !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+  transition: all 0.2s ease;
+}
+
+#visitorTab .nav-link:not(.btn-highlight-historial):hover {
+  background: var(--tab-soft-hover, #e2e8f0);
+  color: var(--tab-color, #1e293b) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.15);
+}
+
+#visitorTab .nav-link.active:not(.btn-highlight-historial) {
+  background: var(--tab-active, linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)) !important;
+  color: #ffffff !important;
+  border-color: var(--tab-color, #1d4ed8);
+  box-shadow: 0 6px 18px var(--tab-shadow, rgba(37, 99, 235, 0.35));
+}
+
+#visitorTab .nav-link.active:not(.btn-highlight-historial) i {
+  color: #ffffff !important;
+}
+
+#tab-btn-feed {
+  --tab-color: #b91c1c;
+  --tab-soft: #fee2e2;
+  --tab-soft-hover: #fecaca;
+  --tab-border: #fca5a5;
+  --tab-active: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  --tab-shadow: rgba(220, 38, 38, 0.35);
+}
+
+#tab-btn-proyectos {
+  --tab-color: #1d4ed8;
+  --tab-soft: #dbeafe;
+  --tab-soft-hover: #bfdbfe;
+  --tab-border: #93c5fd;
+  --tab-active: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  --tab-shadow: rgba(37, 99, 235, 0.35);
+}
+
+#tab-btn-charlas {
+  --tab-color: #0e7490;
+  --tab-soft: #cffafe;
+  --tab-soft-hover: #a5f3fc;
+  --tab-border: #67e8f9;
+  --tab-active: linear-gradient(135deg, #06b6d4 0%, #0e7490 100%);
+  --tab-shadow: rgba(8, 145, 178, 0.35);
+}
+
+#tab-btn-ofertas {
+  --tab-color: #15803d;
+  --tab-soft: #dcfce7;
+  --tab-soft-hover: #bbf7d0;
+  --tab-border: #86efac;
+  --tab-active: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+  --tab-shadow: rgba(22, 163, 74, 0.35);
+}
+
+#tab-btn-empresas {
+  --tab-color: #334155;
+  --tab-soft: #e2e8f0;
+  --tab-soft-hover: #cbd5e1;
+  --tab-border: #94a3b8;
+  --tab-active: linear-gradient(135deg, #475569 0%, #1e293b 100%);
+  --tab-shadow: rgba(51, 65, 85, 0.35);
+}
+
+/* -----------------------------------------------------------------------------
+   PESTAÑA DESTACADA "MI HISTORIAL"
+   ----------------------------------------------------------------------------- */
+.nav-pills .nav-link.btn-highlight-historial {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.35);
+  border: 2px solid #a855f7 !important;
+  transition: all 0.3s ease;
+}
+
+.nav-pills .nav-link.btn-highlight-historial:hover,
+.nav-pills .nav-link.btn-highlight-historial.active {
+  background: linear-gradient(135deg, #6366f1 0%, #9333ea 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(147, 51, 234, 0.5);
+  color: #ffffff !important;
+}
+
+.historial-card-header {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  color: #ffffff;
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+}
+
+/* ── Logos institucionales (desde la configuración del evento) ── */
+[data-logos-institucionales] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+[data-logos-institucionales] img {
+  height: 34px;
+  max-width: 110px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 8px;
+  padding: 3px 6px;
+}
+
+[data-logos-institucionales="hero"] img {
+  height: 56px;
+  max-width: 190px;
+}
+

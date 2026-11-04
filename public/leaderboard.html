@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard Live - Expotecnia EFTP</title>
+  <meta name="description"
+    content="Ranking oficial en tiempo real de la Expotecnia EFTP. Top 5 proyectos con mayor puntaje de la comunidad.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <link rel="stylesheet" href="css/leaderboard.css">
+</head>
+
+<body class="py-3">
+
+  <!-- TICKER DE ACTIVIDAD RECIENTE -->
+  <div class="ticker-wrap mb-3">
+    <div class="ticker-content" id="ticker-content">
+      <span class="ticker-item"><i class="bi bi-wifi text-info"></i> Cargando actividad en vivo...</span>
+    </div>
+  </div>
+
+  <div class="container-fluid px-3 px-lg-5">
+
+    <!-- HEADER -->
+    <header class="mb-4">
+      <!-- Título y subtítulo (logos a la izquierda; nombres institucionales debajo del título) -->
+      <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+        <div class="d-flex flex-wrap align-items-center gap-3">
+          <div class="d-flex align-items-center gap-3" id="logos-container"></div>
+          <div>
+            <h1 class="fw-bold mb-0 text-white" id="header-title" style="font-size:clamp(1.4rem,3vw,2.4rem);">EXPOTECNIA
+              EFTP &bull; TOP 5 TABLERO DE LIDER</h1>
+            <p class="mb-0 mt-1" style="font-size:0.85rem;">
+              <span class="live-dot me-2"></span>
+              <span id="header-inst" class="text-info">RANKING OFICIAL EN TIEMPO REAL</span>
+              <span id="header-sede" class="text-muted"></span>
+            </p>
+            <p class="mb-0" id="header-padre" style="font-size:0.75rem;color:#475569;"></p>
+          </div>
+        </div>
+        <div id="update-badge-sm"
+          style="font-size:0.78rem;background:rgba(15,23,42,0.9);border:1px solid var(--border);border-radius:8px;padding:6px 14px;color:#64748b;">
+          <i class="bi bi-arrow-repeat me-1 text-info"></i>Actualizando cada 10s
+        </div>
+      </div>
+    </header>
+
+    <!-- TELEMETRÍA -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="stat-card s-blue">
+          <div class="stat-value" id="stat-acreditaciones">—</div>
+          <div class="stat-label"><i class="bi bi-person-check me-1"></i>Asistentes</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card s-green">
+          <div class="stat-value" id="stat-evaluaciones">—</div>
+          <div class="stat-label"><i class="bi bi-clipboard2-check me-1"></i>Evaluaciones</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card s-purple">
+          <div class="stat-value" id="stat-prospectos">—</div>
+          <div class="stat-label"><i class="bi bi-mortarboard me-1"></i>Prospectos EFTP</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card s-pink">
+          <div class="stat-value" id="stat-stands">—</div>
+          <div class="stat-label"><i class="bi bi-grid-3x3-gap me-1"></i>Stands Activos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LAYOUT PRINCIPAL -->
+    <div class="row g-4">
+
+      <!-- TOP 5 LEADERBOARD -->
+      <div class="col-12 col-xl-8">
+        <div class="d-flex flex-column gap-3" id="leaderboard-container">
+          <div class="text-center py-5">
+            <div class="spinner-border text-info" style="width:3rem;height:3rem;" role="status"></div>
+            <p class="mt-3 text-muted">Cargando clasificación de la Expotecnia...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL DE ACTIVIDAD RECIENTE -->
+      <div class="col-12 col-xl-4">
+        <div class="feed-panel">
+          <div class="p-3" style="border-bottom:1px solid var(--border);">
+            <span class="fw-bold text-white">
+              <span class="live-dot me-2"></span>Actividad Reciente
+            </span>
+          </div>
+          <div id="feed-list">
+            <div class="feed-item text-muted small">
+              <span class="spinner-border spinner-border-sm me-2"></span> Cargando actividad...
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- OTRAS ACTIVIDADES DE LA EXPO -->
+    <div class="row g-4 mt-1">
+
+      <!-- CHARLAS -->
+      <div class="col-12 col-lg-5">
+        <div class="feed-panel h-100">
+          <div class="p-3" style="border-bottom:1px solid var(--border);">
+            <span class="fw-bold text-white">
+              <i class="bi bi-easel2-fill me-2" style="color:var(--purple);"></i>Charlas de la Expotecnia
+            </span>
+          </div>
+          <div id="charlas-list">
+            <div class="feed-item text-muted small">
+              <span class="spinner-border spinner-border-sm me-2"></span> Cargando agenda...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OFERTAS FORMATIVAS -->
+      <div class="col-12 col-lg-4">
+        <div class="feed-panel h-100">
+          <div class="p-3" style="border-bottom:1px solid var(--border);">
+            <span class="fw-bold text-white">
+              <i class="bi bi-mortarboard-fill me-2" style="color:var(--green);"></i>Ofertas EFTP en demanda
+            </span>
+          </div>
+          <div id="ofertas-list">
+            <div class="feed-item text-muted small">
+              <span class="spinner-border spinner-border-sm me-2"></span> Cargando ofertas...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMPRESAS -->
+      <div class="col-12 col-lg-3">
+        <div class="feed-panel h-100">
+          <div class="p-3" style="border-bottom:1px solid var(--border);">
+            <span class="fw-bold text-white">
+              <i class="bi bi-building me-2" style="color:var(--pink);"></i>Empresas presentes
+            </span>
+          </div>
+          <div id="empresas-list">
+            <div class="feed-item text-muted small">
+              <span class="spinner-border spinner-border-sm me-2"></span> Cargando empresas...
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/leaderboard.js"></script>
+</body>
+
+</html>
