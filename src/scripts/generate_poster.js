@@ -100,6 +100,7 @@ function generarQR(textoQR) {
 
 async function generatePoster(proyecto) {
   const qrUrl = proyecto.enlace_tecnico_url || buildStandUrl(proyecto.codigo_stand);
+  console.log('🔗 QR del poster:', qrUrl);
   const qrBuffer = await generarQR(qrUrl);
 
   const filename = `poster-${proyecto.codigo_stand.toLowerCase()}.pdf`;
