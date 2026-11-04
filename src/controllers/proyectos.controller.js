@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const archivosService = require('../services/archivosService');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
 const path = require('path');
@@ -37,6 +38,15 @@ exports.obtenerProyectoPorCodigo = async (req, res, next) => {
 
     const p = rows[0];
 
+    // Saber si la foto existe realmente (en disco o en el respaldo de MariaDB)
+    let imagenOk = false;
+    try {
+      const enDb = await archivosService.existenArchivos([archivosService.nombreDesdeUrl(p.imagen_url)]);
+      imagenOk = archivosService.urlDisponible(p.imagen_url, enDb);
+    } catch (_) {
+      // Si falla la consulta, no bloqueamos el detalle del proyecto.
+    }
+
     // Obtener comentarios de los evaluadores
     const comentarios = await db.query(`
       SELECT 
@@ -60,6 +70,7 @@ exports.obtenerProyectoPorCodigo = async (req, res, next) => {
         promedio_presentacion: Number(parseFloat(p.promedio_presentacion || 0).toFixed(1)),
         promedio_impacto: Number(parseFloat(p.promedio_impacto || 0).toFixed(1)),
         total_votos: Number(p.total_votos || 0),
+        imagen_ok: imagenOk,
         comentarios: comentarios.map(c => ({
           ...c,
           innovacion: Number(c.innovacion),
@@ -378,12 +389,23 @@ exports.getAllProyectos = async (req, res, next) => {
 
     const rawRows = await db.query(sql, params);
 
+    // Marcar qué proyectos tienen la foto realmente disponible (disco o MariaDB)
+    let enDb = new Set();
+    try {
+      enDb = await archivosService.existenArchivos(
+        rawRows.map((row) => archivosService.nombreDesdeUrl(row.imagen_url))
+      );
+    } catch (_) {
+      // Si falla el respaldo, el listado igual se devuelve.
+    }
+
     const proyectos = rawRows.map(row => ({
       ...row,
       id: Number(row.id),
       trl_nivel: Number(row.trl_nivel),
       promedio: Number(parseFloat(row.promedio || 0).toFixed(2)),
-      total_votos: Number(row.total_votos || 0)
+      total_votos: Number(row.total_votos || 0),
+      imagen_ok: archivosService.urlDisponible(row.imagen_url, enDb)
     }));
 
     res.json({

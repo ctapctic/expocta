@@ -163,10 +163,51 @@ function applyFilters() {
 }
 
 /**
+ * Recuadro que reemplaza a la foto cuando no hay archivo disponible.
+ * @param {string} mensaje
+ * @returns {string}
+ */
+function fotoPlaceholderHTML(mensaje) {
+  return `
+    <div class="d-flex flex-column align-items-center justify-content-center rounded bg-light border text-muted" style="height: 240px;">
+      <i class="bi bi-image" style="font-size: 2.5rem;"></i>
+      <p class="small mb-0 mt-2 px-3 text-center">${mensaje}</p>
+    </div>`;
+}
+
+/**
+ * Si el navegador no puede cargar la imagen (archivo perdido), muestra el aviso
+ * en lugar de dejar el hueco vacío.
+ */
+function reemplazarFotoPorPlaceholder(img) {
+  const cont = img.closest('[data-foto-detalle]');
+  if (cont) {
+    cont.innerHTML = fotoPlaceholderHTML('Foto no disponible — subila de nuevo desde el panel');
+  }
+}
+
+/**
+ * HTML del bloque de foto del modal de detalle.
+ * Usa `imagen_ok` que devuelve la API; si no viene, el onerror cubre el caso.
+ */
+function bloqueFotoHTML(p) {
+  let contenido;
+
+  if (!p.imagen_url) {
+    contenido = fotoPlaceholderHTML('Sin foto cargada');
+  } else if (p.imagen_ok === false) {
+    contenido = fotoPlaceholderHTML('Foto no disponible — subila de nuevo desde el panel');
+  } else {
+    contenido = `<img src="${p.imagen_url}" alt="${p.titulo}" class="img-fluid rounded w-100" style="max-height: 240px; object-fit: cover;" onerror="reemplazarFotoPorPlaceholder(this)">`;
+  }
+
+  return `<div class="mb-3" data-foto-detalle>${contenido}</div>`;
+}
+
+/**
  * Abrir Modal de Detalle y Evaluación de un Proyecto
  */
-async function openProyectoDetailModal(identifier) {
-  try {
+async function openProyectoDetailModal(identifier) {  try {
     const res = await fetch(`/api/proyectos/${identifier}`);
     const data = await res.json();
 
@@ -257,9 +298,7 @@ async function openProyectoDetailModal(identifier) {
       width: '850px',
       html: `
         <div class="text-start">
-          ${p.imagen_url ? `
-            <img src="${p.imagen_url}" alt="${p.titulo}" class="img-fluid rounded mb-3 w-100" style="max-height: 240px; object-fit: cover;" onerror="this.style.display='none'">
-          ` : ''}
+          ${bloqueFotoHTML(p)}
 
           <div class="d-flex flex-wrap gap-2 mb-3">
             <span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>${promedioGeneral} / 5</span>
