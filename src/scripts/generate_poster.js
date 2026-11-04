@@ -9,7 +9,8 @@ const fs = require('fs');
 const path = require('path');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
-const db = require('../config/db');
+const { pool, query: dbQuery } = require('../config/db');
+const { buildStandUrl } = require('../config/publicUrl');
 
 const uploadsDir = path.join(__dirname, '..', '..', 'public', 'uploads');
 const publicDir = path.join(__dirname, '..', '..', 'public');
@@ -98,8 +99,7 @@ function generarQR(textoQR) {
 }
 
 async function generatePoster(proyecto) {
-  const qrUrl = proyecto.enlace_tecnico_url
-    || `http://localhost:3000/evaluar.html?stand=${proyecto.codigo_stand}`;
+  const qrUrl = proyecto.enlace_tecnico_url || buildStandUrl(proyecto.codigo_stand);
   const qrBuffer = await generarQR(qrUrl);
 
   const filename = `poster-${proyecto.codigo_stand.toLowerCase()}.pdf`;
@@ -305,23 +305,21 @@ async function generatePoster(proyecto) {
 
 async function main() {
   const target = process.argv[2];
-  let conn;
   try {
-    conn = await db.query('SELECT 1'); // probar conexión
     console.log('📡 Conectado a MariaDB');
 
     let proyectos;
     if (target) {
-      proyectos = await db.query('SELECT * FROM proyectos WHERE codigo_stand = ?', [target]);
+      proyectos = await dbQuery('SELECT * FROM proyectos WHERE codigo_stand = ?', [target]);
     } else {
-      proyectos = await db.query('SELECT * FROM proyectos ORDER BY codigo_stand');
+      proyectos = await dbQuery('SELECT * FROM proyectos ORDER BY codigo_stand');
     }
 
     console.log(`📋 Generando ${proyectos.length} poster(s) (1 PDF por proyecto)...\n`);
 
     for (const p of proyectos) {
       await generatePoster(p);
-      await db.query(
+      await dbQuery(
         'UPDATE proyectos SET pdf_poster_url = ? WHERE codigo_stand = ?',
         [`/uploads/poster-${p.codigo_stand.toLowerCase()}.pdf`, p.codigo_stand]
       );
@@ -332,6 +330,7 @@ async function main() {
     console.error('❌ Error:', err.message);
     process.exitCode = 1;
   } finally {
+    try { await pool.end(); } catch (_) {}
     process.exit();
   }
 }

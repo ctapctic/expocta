@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "node --watch src/app.js",
-    "generate-brochure": "node src/scripts/generate_brochure.js"
+    "generate-brochure": "node src/scripts/generate_brochure.js",
+    "generate-poster": "node src/scripts/generate_poster.js"
   },
   "keywords": [
     "eftp",

@@ -764,8 +764,8 @@ exports.generarPosterPDF = async (req, res, next) => {
     }
 
     // Generar QR para el proyecto (se usa en la imagen del header y footer)
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const qrUrl = `${baseUrl}/evaluar.html?stand=${encodeURIComponent(proyecto.codigo_stand)}`;
+    const { buildStandUrl } = require('../config/publicUrl');
+    const qrUrl = buildStandUrl(proyecto.codigo_stand);
     const qrDataUrl = await QRCode.toDataURL(qrUrl, { width: 120, margin: 1, color: { dark: '#0f172a', light: '#ffffff' } });
 
     /* ============================================================
