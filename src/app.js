@@ -25,6 +25,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Servir archivos estáticos del Frontend y descargas/uploads
+const { uploadsDir } = require('./config/uploads');
+
+// Primero los archivos subidos en runtime (disco persistente en Render).
+// Si el archivo no está ahí, sigue el static de public/ (archivos versionados en git).
+app.use('/uploads', express.static(uploadsDir));
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Montar Endpoints de API REST

@@ -1,17 +1,13 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const { uploadsDir } = require('../config/uploads');
 
-// Asegurar que el directorio de uploads exista
-const uploadDir = path.join(__dirname, '../../public/uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// El directorio lo crea/valida src/config/uploads.js
 
 // Configuración de almacenamiento en disco
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir);
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
     // Generar nombre de archivo único: timestamp + hash aleatorio + extensión limpia
