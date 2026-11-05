@@ -198,7 +198,7 @@ function bloqueFotoHTML(p) {
   } else if (p.imagen_ok === false) {
     contenido = fotoPlaceholderHTML('Foto no disponible — subila de nuevo desde el panel');
   } else {
-    contenido = `<img src="${p.imagen_url}" alt="${p.titulo}" class="img-fluid rounded w-100" style="max-height: 240px; object-fit: cover;" onerror="reemplazarFotoPorPlaceholder(this)">`;
+    contenido = `<img src="${p.imagen_url}" alt="${p.titulo}" class="img-fluid rounded d-block mx-auto" style="max-height: 180px; object-fit: contain;" onerror="reemplazarFotoPorPlaceholder(this)">`;
   }
 
   return `<div class="mb-3" data-foto-detalle>${contenido}</div>`;
