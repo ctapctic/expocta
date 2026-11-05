@@ -259,9 +259,9 @@ h1, h2, h3, h4, h5, h6, .brand-font {
 }
 
 .catalogo-img {
-  height: 150px;
-  object-fit: cover;
-  background: #0f172a;
+  height: 180px;
+  object-fit: contain;
+  background: #f1f5f9;
 }
 
 .text-truncate-2 {
