@@ -798,7 +798,10 @@ exports.generarPosterPDF = async (req, res, next) => {
        BLOQUE 1: HEADER CON IMAGEN - Azul oscuro, texto blanco
        ============================================================ */
     const h1 = 170;
-    block(0, 0, PW, h1, C.azulOscuro);
+    // Gradiente en el header (azul oscuro -> azul medio)
+    const headerGrad = doc.linearGradient(0, 0, 0, h1);
+    headerGrad.stop(0, C.azulOscuro).stop(1, C.azulMedio);
+    doc.rect(0, 0, PW, h1).fill(headerGrad);
     block(0, 0, 6, h1, C.azulClaro);
 
     // Título grande
@@ -817,32 +820,43 @@ exports.generarPosterPDF = async (req, res, next) => {
     doc.font('Helvetica-Bold').fontSize(8.5).fillColor(trlS.color).text(`TRL ${proyecto.trl_nivel}`, PW - M - tw, 24 + titleH + 10 + 7, { width: tw, align: 'center' });
 
     // Imagen del proyecto y QR lado a lado en el header
-    let imgX = PW - M - 160;
     if (proyecto.imagen_url) {
+      const nombreArchivo = path.basename(proyecto.imagen_url.split('?')[0]);
+      // 1) Intentar desde disco
+      let imgBuffer = null;
       const imgPath = path.join(__dirname, '..', '..', 'public', proyecto.imagen_url);
       if (fs.existsSync(imgPath)) {
-        const iw = 140, ih = 90;
-        const ix = PW - M - iw - 45; // espacio para QR a la derecha
-        const iy = 35;
-        roundedBlock(ix - 3, iy - 3, iw + 6, ih + 6, 8, C.blanco);
+        imgBuffer = fs.readFileSync(imgPath);
+      } else {
+        // 2) Fallback: buscar en la tabla archivos de MariaDB
+        try {
+          const archivo = await archivosService.obtenerArchivo(nombreArchivo);
+          if (archivo && archivo.datos) imgBuffer = archivo.datos;
+        } catch (_) { /* sin imagen */ }
+      }
+      if (imgBuffer) {
+        const iw = 170, ih = 110;
+        const ix = PW - M - iw - 80; // espacio para QR a la derecha
+        const iy = 28;
+        roundedBlock(ix - 4, iy - 4, iw + 8, ih + 8, 10, C.blanco);
         doc.save();
-        doc.roundedRect(ix, iy, iw, ih, 5);
+        doc.roundedRect(ix, iy, iw, ih, 6);
         doc.clip();
-        doc.image(imgPath, ix, iy, { width: iw, height: ih });
+        doc.image(imgBuffer, ix, iy, { width: iw, height: ih, cover: [iw, ih], align: 'center', valign: 'center' });
         doc.restore();
-        imgX = ix - 10;
       }
     }
 
     // QR al lado de la imagen
     if (qrDataUrl) {
-      const qrImgSize = 45;
-      const qrX = imgX - qrImgSize;
-      const qrY = 45;
-      roundedBlock(qrX - 3, qrY - 3, qrImgSize + 6, qrImgSize + 6, 6, C.blanco);
+      const qrImgSize = 70;
+      const qrX = PW - M - qrImgSize - 8;
+      const qrY = 28;
+      roundedBlock(qrX - 6, qrY - 6, qrImgSize + 12, qrImgSize + 12, 8, C.blanco);
       const qrImgBuf = Buffer.from(qrDataUrl.split(',')[1], 'base64');
       doc.image(qrImgBuf, qrX, qrY, { width: qrImgSize, height: qrImgSize });
-      texto(qrX, qrY + qrImgSize + 4, 'ESCANEA', { size: 6, color: C.blanco, width: qrImgSize, align: 'center' });
+      texto(qrX - 6, qrY + qrImgSize + 8, 'ESCANEA', { size: 7, color: C.blanco, width: qrImgSize + 12, align: 'center', bold: true });
+      texto(qrX - 6, qrY + qrImgSize + 18, 'para evaluar', { size: 6, color: C.textoBlancoSuave, width: qrImgSize + 12, align: 'center' });
     }
 
     // Etiquetas especialidad y sector
@@ -879,11 +893,11 @@ exports.generarPosterPDF = async (req, res, next) => {
 
     // Badge Impacto / ODS Principal (destacado)
     if (proyecto.impacto_ods) {
-      const badgeW = 150;
-      roundedBlock(leftX + 10, fy, badgeW, 24, 12, C.azulMedio);
+      const badgeW = 180;
+      roundedBlock(leftX + 10, fy, badgeW, 28, 14, C.azulMedio);
       doc.font('Helvetica-Bold').fontSize(7.5).fillColor(C.blanco).text('IMPACTO / ODS', leftX + 10, fy + 4, { width: badgeW, align: 'center' });
-      doc.font('Helvetica-Bold').fontSize(8.5).fillColor(C.blanco).text(proyecto.impacto_ods, leftX + 10, fy + 12, { width: badgeW, align: 'center' });
-      fy += 34;
+      doc.font('Helvetica-Bold').fontSize(9).fillColor(C.blanco).text(proyecto.impacto_ods, leftX + 10, fy + 13, { width: badgeW, align: 'center' });
+      fy += 38;
     }
 
     // Dos columnas de campos
@@ -896,8 +910,8 @@ exports.generarPosterPDF = async (req, res, next) => {
     const camposDer = [
       { label: 'Título del Proyecto', val: proyecto.titulo },
       { label: 'Nivel TRL (1-9)', val: `TRL ${proyecto.trl_nivel}` },
-      { label: 'Docente Tutor', val: proyecto.docente_tutor },
-      { label: 'Contacto', val: 'Vía institucional' },
+      { label: 'Docente Tutor', val: proyecto.docente_tutor || 'No asignado' },
+      { label: 'Fecha de Registro', val: proyecto.creado_en ? new Date(proyecto.creado_en).toLocaleDateString('es-PY', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'No disponible' },
     ];
 
     camposIzq.forEach((f, i) => {
@@ -923,8 +937,9 @@ exports.generarPosterPDF = async (req, res, next) => {
     if (proyecto.requerimientos_exhibicion) {
       const tyReq = tyTec + 22;
       texto(leftX + 10, tyReq, 'Requerimientos de Exhibición', { width: 150, size: 7, color: C.textoGris, bold: true });
+      const reqH = doc.heightOfString(proyecto.requerimientos_exhibicion, { width: CW - 170, lineGap: 2 });
       texto(leftX + 160, tyReq, proyecto.requerimientos_exhibicion, {
-        width: CW - 170, size: 8.5, color: C.textoOscuro, bold: true
+        width: CW - 170, size: 8.5, color: C.textoOscuro, bold: true, lineGap: 2
       });
     }
 
@@ -932,16 +947,54 @@ exports.generarPosterPDF = async (req, res, next) => {
     block(leftX, bodyY + fichaAltura - 1, CW, 1, C.linea);
 
     /* ============================================================
+       BLOQUE 2.6: EVALUACIÓN (promedio y desglose por eje)
+       ============================================================ */
+    if (proyecto.total_votos > 0) {
+      const evalY = bodyY + fichaAltura + 12;
+      texto(leftX, evalY, 'EVALUACIÓN DEL PROYECTO', { size: 11, color: C.azulMedio, bold: true });
+      block(leftX, evalY + 14, CW, 1, C.linea);
+
+      // Promedio general con estrellas
+      const promY = evalY + 22;
+      roundedBlock(leftX, promY, CW, 40, 8, C.blanco);
+      texto(leftX + 12, promY + 6, 'PROMEDIO GENERAL', { size: 7.5, color: C.textoGris, bold: true, width: 120 });
+      estrellas(leftX + 12, promY + 18, proyecto.promedio, 12);
+      texto(leftX + 12 + 5 * 13.5, promY + 18, `${proyecto.promedio.toFixed(1)} / 5`, { size: 11, color: C.amber, bold: true });
+      texto(leftX + CW - 100, promY + 8, `${proyecto.total_votos} evaluación${proyecto.total_votos === 1 ? '' : 'es'}`, { size: 8, color: C.textoGris, width: 90, align: 'right' });
+
+      // Desglose por eje
+      const ejes = [
+        { label: 'Innovación', val: proyecto.promedio_innovacion, color: C.azulClaro },
+        { label: 'Dominio Técnico', val: proyecto.promedio_dominio_tecnico, color: C.emerald },
+        { label: 'Presentación', val: proyecto.promedio_presentacion, color: C.amber },
+        { label: 'Impacto', val: proyecto.promedio_impacto, color: C.rose },
+      ];
+      const barY = promY + 48;
+      const barW = (CW - 20) / 2;
+      ejes.forEach((eje, i) => {
+        const col = i % 2 === 0 ? leftX + 10 : leftX + 10 + barW + 10;
+        const row = Math.floor(i / 2);
+        const yy = barY + row * 22;
+        texto(col, yy, eje.label, { size: 7.5, color: C.textoGris, width: barW * 0.45 });
+        barraProgreso(col + barW * 0.47, yy + 2, barW * 0.4, eje.val / 5, eje.color);
+        texto(col + barW * 0.47 + barW * 0.4 + 6, yy, eje.val.toFixed(1), { size: 8, color: C.textoOscuro, bold: true });
+      });
+
+      // Actualizar textoAbajoY para que el siguiente bloque no se solape
+      textoAbajoY = barY + 2 * 22 + 16;
+    } else {
+      textoAbajoY = bodyY + fichaAltura + 12;
+    }
+
+    /* ============================================================
        BLOQUE 2.5: PROBLEMA QUE RESUELVE (ancho completo)
        ============================================================ */
-    const problemaY = bodyY + fichaAltura + 12;
-    let textoAbajoY = problemaY + 60; // valor por defecto si no hay problema
-
+    const problemaY = textoAbajoY;
     if (proyecto.problema_que_resuelve) {
       texto(leftX, problemaY, 'PROBLEMA QUE RESUELVE', { size: 11, color: C.azulMedio, bold: true });
       block(leftX, problemaY + 14, CW, 1, C.linea);
 
-      const problemaH = 50;
+      const problemaH = Math.max(50, doc.heightOfString(proyecto.problema_que_resuelve, { width: CW - 20, lineGap: 3 }) + 16);
       block(leftX, problemaY + 16, CW, problemaH, C.blanco);
       texto(leftX + 10, problemaY + 24, proyecto.problema_que_resuelve, {
         width: CW - 20, size: 8.6, color: C.textoOscuro, lineGap: 3, align: 'justify'
@@ -1013,13 +1066,17 @@ exports.generarPosterPDF = async (req, res, next) => {
        ============================================================ */
     const footerY = PH - 60;
     const footerH = 60;
-    block(0, footerY, PW, footerH, C.azulOscuro);
+    const footerGrad = doc.linearGradient(0, footerY, 0, footerY + footerH);
+    footerGrad.stop(0, C.azulMedio).stop(1, C.azulOscuro);
+    doc.rect(0, footerY, PW, footerH).fill(footerGrad);
     block(0, footerY, PW, 1, C.azulClaro);
 
     texto(M, footerY + 8, 'EXPOTECNIA EFTP 2026', { size: 10, color: C.blanco, bold: true, width: 170 });
     texto(M, footerY + 20, 'Plataforma de Innovación Tecnológica Educativa', { size: 7.5, color: C.textoBlancoSuave, width: 220 });
 
-    texto(PW - M - 170, footerY + 30, 'Generado automáticamente por Expotecnia EFTP', { size: 7, color: C.textoBlancoSuave, width: 170, align: 'right' });
+    texto(PW - M - 170, footerY + 8, 'Generado automáticamente por Expotecnia EFTP', { size: 7, color: C.textoBlancoSuave, width: 170, align: 'right' });
+    texto(PW - M - 170, footerY + 20, new Date().toLocaleDateString('es-PY', { day: '2-digit', month: '2-digit', year: 'numeric' }), { size: 7, color: C.textoBlancoSuave, width: 170, align: 'right' });
+    texto(PW - M - 170, footerY + 32, 'https://expocta.onrender.com', { size: 7, color: C.celesteMedio, width: 170, align: 'right' });
 
     doc.end();
   } catch (err) {
