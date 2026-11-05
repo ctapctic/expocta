@@ -86,7 +86,7 @@ function renderProyectos(proyectos) {
     const imgUrl = p.imagen_url || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=400&auto=format&fit=crop&q=80';
 
     return `
-      <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+      <div class="col-12 col-sm-6 col-md-4 col-lg-4 mb-4">
         <div class="card card-catalogo h-100 border-0 shadow-sm overflow-hidden">
           <div class="position-relative">
             <img src="${imgUrl}" alt="${p.titulo}" class="w-100 catalogo-img" 
@@ -100,7 +100,7 @@ function renderProyectos(proyectos) {
               <span class="badge bg-primary-subtle text-primary fw-semibold small">${p.especialidad}</span>
               ${p.sector_aplicacion ? `<span class="badge bg-info-subtle text-info small">${p.sector_aplicacion}</span>` : ''}
             </div>
-            <h6 class="fw-bold text-dark mb-1">${p.titulo}</h6>
+            <h6 class="fw-bold text-dark mb-1 text-truncate-2">${p.titulo}</h6>
             <span class="trl-badge ${trlClass} small">TRL ${p.trl_nivel}</span>
 
             <div class="mt-auto d-flex flex-wrap gap-2">
