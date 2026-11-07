@@ -187,6 +187,63 @@
         </div>
       </div>
 
+      <!-- ── VENTANAS DE TIEMPO ── -->
+      <div class="col-12">
+        <div class="config-panel">
+          <div class="panel-header">
+            <i class="bi bi-clock-history text-warning"></i>
+            <span class="fw-bold text-white">Ventanas de Tiempo</span>
+            <span class="ms-auto text-muted small">Dejar vacío = sin límite</span>
+          </div>
+          <div class="panel-body">
+            <div class="row g-4">
+
+              <!-- Registro -->
+              <div class="col-12 col-lg-6">
+                <h6 class="fw-bold text-info mb-1"><i class="bi bi-person-plus-fill me-1"></i>Registro</h6>
+                <p class="text-muted small mb-3">Alta de visitantes, alumnos y empresas, e interés en carreras.</p>
+                <div class="row g-3">
+                  <div class="col-sm-6">
+                    <label class="form-label" for="registro_inicio">Apertura</label>
+                    <input type="datetime-local" class="form-control" id="registro_inicio" name="registro_inicio">
+                  </div>
+                  <div class="col-sm-6">
+                    <label class="form-label" for="registro_fin">Cierre</label>
+                    <input type="datetime-local" class="form-control" id="registro_fin" name="registro_fin">
+                  </div>
+                </div>
+                <div id="estado-registro" class="form-text mt-2"></div>
+              </div>
+
+              <!-- Votación -->
+              <div class="col-12 col-lg-6">
+                <h6 class="fw-bold text-info mb-1"><i class="bi bi-star-fill me-1"></i>Votación</h6>
+                <p class="text-muted small mb-3">Valoración de proyectos, empresas y charlas.</p>
+                <div class="row g-3">
+                  <div class="col-sm-6">
+                    <label class="form-label" for="votacion_inicio">Apertura</label>
+                    <input type="datetime-local" class="form-control" id="votacion_inicio" name="votacion_inicio">
+                  </div>
+                  <div class="col-sm-6">
+                    <label class="form-label" for="votacion_fin">Cierre</label>
+                    <input type="datetime-local" class="form-control" id="votacion_fin" name="votacion_fin">
+                  </div>
+                </div>
+                <div id="estado-votacion" class="form-text mt-2"></div>
+              </div>
+
+            </div>
+
+            <div class="alert alert-info small mt-3 mb-0">
+              <i class="bi bi-info-circle me-1"></i>
+              Las fechas se ingresan en tu hora local y se guardan en UTC. El login de cuentas ya existentes
+              sigue funcionando aunque el registro esté cerrado. Los votos emitidos antes del cierre
+              permanecen visibles en el leaderboard.
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ── VISTA PREVIA HEADER ── -->
       <div class="col-12">
         <div class="config-panel">

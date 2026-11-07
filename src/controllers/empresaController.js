@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const ventanasService = require('../services/ventanasService');
 
 /**
  * Obtener listado de empresas participantes y sus ofertas de pasantía
@@ -165,6 +166,15 @@ exports.evaluarEmpresa = async (req, res, next) => {
       return res.status(400).json({
         success: false,
         message: 'Los puntajes deben estar entre 1 y 5.'
+      });
+    }
+
+    const controlVentana = await ventanasService.verificarAccion('votacion', usuario_id);
+    if (!controlVentana.permitido) {
+      return res.status(403).json({
+        success: false,
+        message: controlVentana.mensaje,
+        ventana: controlVentana.ventana
       });
     }
 

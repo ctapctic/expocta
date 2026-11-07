@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const archivosService = require('../services/archivosService');
+const ventanasService = require('../services/ventanasService');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
 const path = require('path');
@@ -112,6 +113,15 @@ exports.evaluarProyecto = async (req, res, next) => {
       return res.status(400).json({
         success: false,
         message: 'Los puntajes de la rúbrica deben estar entre 1 y 5.'
+      });
+    }
+
+    const controlVentana = await ventanasService.verificarAccion('votacion', usuario_id);
+    if (!controlVentana.permitido) {
+      return res.status(403).json({
+        success: false,
+        message: controlVentana.mensaje,
+        ventana: controlVentana.ventana
       });
     }
 

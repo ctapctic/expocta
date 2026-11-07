@@ -61,7 +61,7 @@ function updateUserUI() {
 /**
  * Modal interactivo para Login/Registro por PIN
  */
-function showAuthModal(defaultRole = 'visitante', onSuccessCallback = null) {
+async function showAuthModal(defaultRole = 'visitante', onSuccessCallback = null) {
   const u = getCurrentUser();
   if (u) {
     Swal.fire({
@@ -92,9 +92,20 @@ function showAuthModal(defaultRole = 'visitante', onSuccessCallback = null) {
     return;
   }
 
+  if (typeof Ventanas !== 'undefined') {
+    try { await Ventanas.cargar(); } catch (_) { /* sin datos: se asume abierto */ }
+  }
+
   Swal.fire({
     title: '🔑 Acceso por Email / PIN',
     html: `
+      ${typeof Ventanas !== 'undefined' && !Ventanas.abierta('registro') ? `
+        <div class="alert alert-warning text-start small py-2 mb-3">
+          <i class="bi bi-lock-fill me-1"></i>
+          <strong>${Ventanas.mensaje('registro')}</strong>
+          Si ya tenés una cuenta, ingresá tu PIN para continuar.
+        </div>
+      ` : ''}
       <form id="swal-auth-form" class="text-start">
         <div class="mb-3">
           <label class="form-label fw-bold">Correo Electrónico</label>

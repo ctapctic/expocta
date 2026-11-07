@@ -99,8 +99,12 @@ function renderCharlas(charlas) {
 /**
  * Modal interactivo para evaluar Charla
  */
-function openCharlaEvalModal(charlaId, charlaTitulo) {
+async function openCharlaEvalModal(charlaId, charlaTitulo) {
   const user = getCurrentUser();
+
+  if (typeof Ventanas !== 'undefined' && !(await Ventanas.bloquear('votacion'))) {
+    return;
+  }
 
   Swal.fire({
     title: `🎤 Evaluar Charla`,

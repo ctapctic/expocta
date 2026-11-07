@@ -134,6 +134,10 @@ async function evaluarEmpresaModal(empresaId, nombreEmpresa) {
     return;
   }
 
+  if (typeof Ventanas !== 'undefined' && !(await Ventanas.bloquear('votacion'))) {
+    return;
+  }
+
   // Verificar si ya evaluó
   let yaEvaluo = false;
   let miValoracion = null;

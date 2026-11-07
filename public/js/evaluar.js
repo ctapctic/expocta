@@ -5,9 +5,14 @@
 let currentProyecto = null;
 let miValoracion = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const standCodigo = urlParams.get('stand') || urlParams.get('codigo') || urlParams.get('id') || 'STAND-101';
+
+  // Estado de la ventana de votación (si falla, se asume abierta).
+  if (typeof Ventanas !== 'undefined') {
+    try { await Ventanas.cargar(); } catch (_) { /* ignorar */ }
+  }
 
   cargarProyectoParaEvaluacion(standCodigo);
 });
@@ -85,7 +90,8 @@ function renderProyectoForm(p, miValoracion = null) {
   const trlClass = p.trl_nivel <= 3 ? 'trl-low' : p.trl_nivel <= 6 ? 'trl-mid' : 'trl-high';
   const user = getCurrentUser();
   const yaEvaluo = !!miValoracion;
-  const disabledAttr = yaEvaluo ? 'disabled' : '';
+  const votacionCerrada = typeof Ventanas !== 'undefined' && !Ventanas.abierta('votacion');
+  const disabledAttr = (yaEvaluo || votacionCerrada) ? 'disabled' : '';
 
   // Reproductor dinámico de video pitch o imagen
   let mediaHTML = '';
@@ -199,6 +205,13 @@ function renderProyectoForm(p, miValoracion = null) {
             <span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>Promedio: ${p.promedio} / 5 (${p.total_votos} votos)</span>
           </div>
 
+          ${votacionCerrada ? `
+            <div class="alert alert-danger py-2 mb-3 small">
+              <i class="bi bi-lock-fill me-1"></i><strong>${Ventanas.mensaje('votacion')}</strong>
+              Las valoraciones ya emitidas siguen visibles en el ranking.
+            </div>
+          ` : ''}
+
           ${!user ? `
             <div class="alert alert-info py-2 d-flex align-items-center justify-content-between mb-3">
               <span class="small"><i class="bi bi-info-circle me-1"></i>Identifícate para emitir tu calificación oficial.</span>
@@ -306,6 +319,10 @@ async function procesarEvaluacion(event) {
   const user = getCurrentUser();
   if (!user) {
     showAuthModal();
+    return;
+  }
+
+  if (typeof Ventanas !== 'undefined' && !(await Ventanas.bloquear('votacion'))) {
     return;
   }
 

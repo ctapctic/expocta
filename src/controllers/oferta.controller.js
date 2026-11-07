@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const ventanasService = require('../services/ventanasService');
 
 /**
  * Valida y normaliza el link externo de información de una oferta.
@@ -68,6 +69,16 @@ exports.registrarProspecto = async (req, res, next) => {
       return res.status(400).json({
         success: false,
         message: 'Campos requeridos faltantes: usuario_id, oferta_id, teléfono.'
+      });
+    }
+
+    // El interés en carreras usa la misma ventana que el registro de visitantes.
+    const controlVentana = await ventanasService.verificarAccion('registro', usuario_id, { permitirGestor: false });
+    if (!controlVentana.permitido) {
+      return res.status(403).json({
+        success: false,
+        message: controlVentana.mensaje,
+        ventana: controlVentana.ventana
       });
     }
 

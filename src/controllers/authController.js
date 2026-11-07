@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
+const ventanasService = require('../services/ventanasService');
 
 const BCRYPT_ROUNDS = 10;
 
@@ -91,6 +92,16 @@ exports.loginOrRegister = async (req, res, next) => {
 
     // Registro de cuenta nueva: visitantes, alumnos y empresas entran sin aprobación.
     // Los roles de gestión (docente/admin) solo los crea el administrador general.
+    // El login de cuentas existentes (bloque anterior) NO se ve afectado por la ventana.
+    const controlVentana = await ventanasService.verificarAccion('registro', null, { permitirGestor: false });
+    if (!controlVentana.permitido) {
+      return res.status(403).json({
+        success: false,
+        message: controlVentana.mensaje,
+        ventana: controlVentana.ventana
+      });
+    }
+
     const rolSolicitado = String(req.body.rol || 'visitante').trim().toLowerCase();
     if (!ROLES_AUTO_REGISTRO.includes(rolSolicitado)) {
       return res.status(403).json({

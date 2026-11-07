@@ -80,8 +80,12 @@ function renderOfertas(ofertas) {
 /**
  * Modal interactivo para captar prospecto interesado en la carrera
  */
-function openProspectoModal(ofertaId, carreraNombre) {
+async function openProspectoModal(ofertaId, carreraNombre) {
   const user = getCurrentUser();
+
+  if (typeof Ventanas !== 'undefined' && !(await Ventanas.bloquear('registro'))) {
+    return;
+  }
 
   Swal.fire({
     title: `🎓 Solicitar Información`,

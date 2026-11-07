@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const ventanasService = require('../services/ventanasService');
 
 /**
  * GET /api/config
@@ -13,6 +14,26 @@ exports.getConfig = async (req, res, next) => {
       config[row.clave] = { valor: row.valor, descripcion: row.descripcion };
     }
     res.json({ success: true, config });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * GET /api/config/ventanas
+ * Estado de las ventanas de registro y votación.
+ * Público: el frontend lo usa para deshabilitar acciones fuera de horario.
+ */
+exports.getVentanas = async (req, res, next) => {
+  try {
+    const force = req.query.force === '1';
+    const ventanas = await ventanasService.obtenerVentanas({ force });
+    res.set('Cache-Control', 'no-store');
+    res.json({
+      success: true,
+      ahora: new Date().toISOString(),
+      ventanas
+    });
   } catch (err) {
     next(err);
   }
@@ -52,6 +73,10 @@ exports.updateConfig = async (req, res, next) => {
       );
       if (result.affectedRows > 0) updated++;
     }
+
+    // Las ventanas de tiempo se leen con cache: invalidar para que el cambio
+    // tenga efecto inmediato (sin reiniciar el servidor).
+    ventanasService.invalidarCache();
 
     res.json({
       success: true,

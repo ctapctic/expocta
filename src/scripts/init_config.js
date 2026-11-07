@@ -22,7 +22,11 @@ const DEFAULTS = [
   ['logo_ministerio_url',      '',                                       'URL del logo del ministerio (subida o externa)'],
   ['logo_institucion_url',     '',                                       'URL del logo de la institución organizadora'],
   ['color_primario',           '#38bdf8',                               'Color primario del branding del evento (hex)'],
-  ['mensaje_bienvenida',       'Bienvenidos a la Expotecnia EFTP',      'Mensaje de bienvenida en pantallas públicas']
+  ['mensaje_bienvenida',       'Bienvenidos a la Expotecnia EFTP',      'Mensaje de bienvenida en pantallas públicas'],
+  ['registro_inicio',          '',                                       'Inicio de la ventana de registro (ISO 8601 UTC, vacío = sin límite)'],
+  ['registro_fin',             '',                                       'Fin de la ventana de registro (ISO 8601 UTC, vacío = sin límite)'],
+  ['votacion_inicio',          '',                                       'Inicio de la ventana de votación (ISO 8601 UTC, vacío = sin límite)'],
+  ['votacion_fin',             '',                                       'Fin de la ventana de votación (ISO 8601 UTC, vacío = sin límite)']
 ];
 
 async function run() {

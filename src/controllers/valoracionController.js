@@ -1,4 +1,20 @@
 const db = require('../config/db');
+const ventanasService = require('../services/ventanasService');
+
+/**
+ * Responda 403 si la votación está cerrada para este usuario.
+ * Devuelve true cuando la petición ya fue respondida (debe cortar el handler).
+ */
+async function bloqueadaPorVentana(req, res, usuarioId) {
+  const control = await ventanasService.verificarAccion('votacion', usuarioId);
+  if (control.permitido) return false;
+  res.status(403).json({
+    success: false,
+    message: control.mensaje,
+    ventana: control.ventana
+  });
+  return true;
+}
 
 /**
  * Registrar o actualizar valoración individual de proyecto
@@ -22,6 +38,8 @@ exports.valorarProyecto = async (req, res, next) => {
         message: 'Los puntajes de evaluación deben estar comprendidos entre 1 y 5.'
       });
     }
+
+    if (await bloqueadaPorVentana(req, res, usuario_id)) return;
 
     // Insertar o actualizar si ya fue valorado por el mismo usuario
     const sql = `
@@ -77,6 +95,8 @@ exports.valorarCharla = async (req, res, next) => {
       });
     }
 
+    if (await bloqueadaPorVentana(req, res, usuario_id)) return;
+
     const sql = `
       INSERT INTO valoraciones_charlas 
       (usuario_id, charla_id, nota_contenido, nota_expositor, comentario)
@@ -117,6 +137,8 @@ exports.syncBatchEvaluaciones = async (req, res, next) => {
     if (!usuario_id) {
       return res.status(400).json({ success: false, message: 'Se requiere el usuario_id para sincronizar.' });
     }
+
+    if (await bloqueadaPorVentana(req, res, usuario_id)) return;
 
     conn = await db.pool.getConnection();
     await conn.beginTransaction();

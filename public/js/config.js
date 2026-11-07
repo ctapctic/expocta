@@ -95,6 +95,13 @@
         document.getElementById('color_primario_picker').value = colorVal;
         document.getElementById('color_preview_text').style.color = colorVal;
 
+        // Ventanas de tiempo (ISO UTC -> valor local del input datetime-local)
+        CAMPOS_VENTANAS.forEach(k => {
+          const el = document.getElementById(k);
+          if (el) el.value = isoToLocalInput(c[k]?.valor || '');
+        });
+        actualizarEstadoVentanasDesdeFormulario();
+
         // Logo previews
         previewLogo(document.getElementById('logo_ministerio_url'), 'prev-ministerio');
         previewLogo(document.getElementById('logo_institucion_url'), 'prev-institucion');
@@ -106,6 +113,78 @@
       }
     }
 
+    /* ── VENTANAS DE TIEMPO ── */
+    const CAMPOS_VENTANAS = ['registro_inicio', 'registro_fin', 'votacion_inicio', 'votacion_fin'];
+
+    // ISO UTC -> "YYYY-MM-DDTHH:mm" en hora local del navegador (para datetime-local)
+    function isoToLocalInput(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    // "YYYY-MM-DDTHH:mm" (hora local) -> ISO UTC (con Z)
+    function localInputToISO(valor) {
+      if (!valor) return '';
+      const d = new Date(valor);
+      if (isNaN(d.getTime())) return '';
+      return d.toISOString();
+    }
+
+    function formatearFechaLocal(ms) {
+      try {
+        return new Date(ms).toLocaleString('es-PY', { dateStyle: 'short', timeStyle: 'short' });
+      } catch (_) {
+        return new Date(ms).toLocaleString();
+      }
+    }
+
+    function textoEstadoVentana(inicioISO, finISO) {
+      const ahora = Date.now();
+      const ini = inicioISO ? Date.parse(inicioISO) : null;
+      const fin = finISO ? Date.parse(finISO) : null;
+
+      if ((!ini || isNaN(ini)) && (!fin || isNaN(fin))) {
+        return { abierta: true, texto: 'Sin límites: siempre abierto.' };
+      }
+      if (ini && !isNaN(ini) && ahora < ini) {
+        return { abierta: false, texto: `Cerrado. Se habilita el ${formatearFechaLocal(ini)}.` };
+      }
+      if (fin && !isNaN(fin) && ahora > fin) {
+        return { abierta: false, texto: `Cerrado. Cerró el ${formatearFechaLocal(fin)}.` };
+      }
+      return {
+        abierta: true,
+        texto: fin && !isNaN(fin) ? `Abierto hasta el ${formatearFechaLocal(fin)}.` : 'Abierto.'
+      };
+    }
+
+    function pintarEstadoVentana(idEl, estado) {
+      const el = document.getElementById(idEl);
+      if (!el) return;
+      el.innerHTML = estado.abierta
+        ? `<span class="text-success"><i class="bi bi-unlock-fill me-1"></i>${estado.texto}</span>`
+        : `<span class="text-danger"><i class="bi bi-lock-fill me-1"></i>${estado.texto}</span>`;
+    }
+
+    function actualizarEstadoVentanasDesdeFormulario() {
+      const leer = (id) => {
+        const el = document.getElementById(id);
+        return el ? localInputToISO(el.value) : '';
+      };
+
+      pintarEstadoVentana('estado-registro', textoEstadoVentana(leer('registro_inicio'), leer('registro_fin')));
+      pintarEstadoVentana('estado-votacion', textoEstadoVentana(leer('votacion_inicio'), leer('votacion_fin')));
+    }
+
+    // Previsualización en vivo al editar las fechas
+    CAMPOS_VENTANAS.forEach(k => {
+      const el = document.getElementById(k);
+      if (el) el.addEventListener('input', actualizarEstadoVentanasDesdeFormulario);
+    });
+
     /* ── GUARDAR ── */
     async function guardarConfiguracion(e) {
       e.preventDefault();
@@ -116,6 +195,24 @@
 
       const form = document.getElementById('config-form');
       const data = new FormData(form);
+
+      // datetime-local (hora local) -> ISO 8601 UTC para el backend
+      CAMPOS_VENTANAS.forEach(k => {
+        const raw = data.get(k);
+        if (typeof raw === 'string') data.set(k, localInputToISO(raw));
+      });
+
+      // Validación: apertura anterior al cierre
+      for (const tipo of ['registro', 'votacion']) {
+        const ini = data.get(`${tipo}_inicio`);
+        const fin = data.get(`${tipo}_fin`);
+        if (ini && fin && new Date(ini) >= new Date(fin)) {
+          mostrarToast(`La apertura de ${tipo} debe ser anterior al cierre.`, true);
+          btn.disabled = false;
+          overlay.classList.remove('active');
+          return;
+        }
+      }
 
       // Si se eligió un archivo de logo, se envía el binario y se descarta la URL del campo
       [
