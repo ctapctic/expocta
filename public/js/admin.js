@@ -269,6 +269,11 @@ const CRUD_ENTIDADES = {
       { titulo: 'Nombre Corporativo', campo: 'nombre_corporativo' },
       { titulo: 'Tipo', campo: 'tipo', badge: 'bg-secondary' },
       { titulo: 'Stand', campo: 'stand_numero' },
+      {
+        titulo: 'Valoración',
+        campo: 'promedio',
+        html: (r) => `<span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>${Number(r.promedio || 0).toFixed(2)}</span> <span class="small text-muted">${r.total_votos || 0} votos</span>`
+      },
       { titulo: 'Descripción', campo: 'descripcion', fmt: (v) => v && v.length > 80 ? v.slice(0, 80) + '…' : v }
     ],
     campos: ['codigo_empresa', 'nombre_corporativo', 'tipo', 'stand_numero', 'descripcion', 'ofertas_pasantia', 'requisitos_perfil'],
