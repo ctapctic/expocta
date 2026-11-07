@@ -122,7 +122,7 @@ async function loadAdminStats() {
               <div class="small text-muted">${p.especialidad}</div>
             </div>
             <div class="text-end">
-              <span class="badge bg-warning text-dark fs-6"><i class="bi bi-star-fill me-1"></i>${p.promedio_general}</span>
+              <span class="badge bg-warning text-dark fs-5 px-3 py-2"><i class="bi bi-star-fill me-1"></i>${Number(p.promedio_general).toFixed(2)}</span>
               <div class="small text-muted">${p.total_votos} votos</div>
             </div>
           </li>
