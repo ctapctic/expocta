@@ -208,8 +208,49 @@ exports.evaluarEmpresa = async (req, res, next) => {
 };
 
 /**
- * Eliminar una empresa por ID
+ * Obtener estadísticas y ranking de empresas por valoración
  */
+exports.getStatsAndRankingEmpresas = async (req, res, next) => {
+  try {
+    const topEmpresas = await db.query(`
+      SELECT 
+        e.id, e.codigo_empresa, e.nombre_corporativo, e.tipo, e.stand_numero, e.logo_url,
+        COALESCE(AVG((v.calidad_servicio + v.atencion + v.propuesta_valor + v.innovacion + v.impacto_social_economico) / 5.0), 0) AS promedio,
+        COUNT(v.id) AS total_votos
+      FROM empresas e
+      LEFT JOIN valoraciones_empresas v ON e.id = v.empresa_id
+      GROUP BY e.id
+      ORDER BY promedio DESC, total_votos DESC
+      LIMIT 5
+    `);
+
+    const statsGenerales = await db.query(`
+      SELECT
+        (SELECT COUNT(*) FROM empresas) AS total_empresas,
+        (SELECT COUNT(*) FROM valoraciones_empresas) AS total_evaluaciones_empresas
+    `);
+
+    res.json({
+      success: true,
+      topEmpresas: topEmpresas.map(item => ({
+        id: Number(item.id),
+        codigo_empresa: item.codigo_empresa,
+        nombre_corporativo: item.nombre_corporativo,
+        tipo: item.tipo,
+        stand_numero: item.stand_numero,
+        logo_url: item.logo_url,
+        promedio: Number(parseFloat(item.promedio || 0).toFixed(2)),
+        total_votos: Number(item.total_votos || 0)
+      })),
+      stats: {
+        total_empresas: Number(statsGenerales[0].total_empresas),
+        total_evaluaciones_empresas: Number(statsGenerales[0].total_evaluaciones_empresas)
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 exports.deleteEmpresa = async (req, res, next) => {
   try {
     const { id } = req.params;

@@ -5,6 +5,7 @@ const upload = require('../middleware/multer');
 const { requireAdminOrDocente } = require('../middleware/authMiddleware');
 
 router.get('/', empresaController.getAllEmpresas);
+router.get('/stats', empresaController.getStatsAndRankingEmpresas);
 router.get('/:identifier', empresaController.getEmpresaByIdOrCode);
 
 // Evaluar una empresa (Cualquier visitante/evaluador)
