@@ -53,7 +53,7 @@
       // Institución padre / ministerio
       const padreEl = document.getElementById('header-padre');
       if (padreEl && padre) {
-        padreEl.innerHTML = `<i class="bi bi-diagram-3 me-1"></i>${padre}`;
+        padreEl.innerHTML = `<i class="bi bi-diagram-3 me-1" style="color:${color};"></i>${padre}`;
       }
 
       // Logos (misma línea del título)
