@@ -250,11 +250,4 @@ async function evaluarEmpresaModal(empresaId, nombreEmpresa) {
   }
 }
 
-// Helper para obtener usuario actual (debe existir en app.js o similar)
-function getCurrentUser() {
-  try {
-    return JSON.parse(localStorage.getItem('currentUser') || 'null');
-  } catch (_) {
-    return null;
-  }
-}
+// getCurrentUser() is provided by app.js (localStorage key: 'expotecnia_user')
