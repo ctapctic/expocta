@@ -253,7 +253,8 @@ exports.getLiveEventFeed = async (req, res, next) => {
         u.rol AS usuario_rol,
         p.codigo_stand,
         p.titulo AS objeto_titulo,
-        ROUND((v.innovacion + v.dominio_tecnico + v.presentacion + v.impacto)/4.0, 1) AS puntaje
+        ROUND((v.innovacion + v.dominio_tecnico + v.presentacion + v.impacto)/4.0, 1) AS puntaje,
+        TIMESTAMPDIFF(SECOND, v.creado_en, NOW()) AS segundos_hace
       FROM valoraciones_proyectos v
       JOIN usuarios u ON v.usuario_id = u.id
       JOIN proyectos p ON v.proyecto_id = p.id
@@ -269,7 +270,8 @@ exports.getLiveEventFeed = async (req, res, next) => {
         u.rol AS usuario_rol,
         c.codigo_charla AS codigo_stand,
         c.titulo AS objeto_titulo,
-        ROUND((v.nota_contenido + v.nota_expositor)/2.0, 1) AS puntaje
+        ROUND((v.nota_contenido + v.nota_expositor)/2.0, 1) AS puntaje,
+        TIMESTAMPDIFF(SECOND, v.creado_en, NOW()) AS segundos_hace
       FROM valoraciones_charlas v
       JOIN usuarios u ON v.usuario_id = u.id
       JOIN charlas c ON v.charla_id = c.id
@@ -285,7 +287,8 @@ exports.getLiveEventFeed = async (req, res, next) => {
         u.rol AS usuario_rol,
         o.codigo_oferta AS codigo_stand,
         o.nombre_carrera AS objeto_titulo,
-        5.0 AS puntaje
+        5.0 AS puntaje,
+        TIMESTAMPDIFF(SECOND, pr.creado_en, NOW()) AS segundos_hace
       FROM prospectos_eftp pr
       JOIN usuarios u ON pr.usuario_id = u.id
       JOIN oferta_formativa o ON pr.oferta_id = o.id
@@ -293,10 +296,28 @@ exports.getLiveEventFeed = async (req, res, next) => {
       LIMIT 10
     `);
 
+    const actividadesEmpresas = await db.query(`
+      SELECT 
+        'evaluacion_empresa' AS tipo,
+        v.creado_en AS fecha,
+        u.nombre AS usuario_nombre,
+        u.rol AS usuario_rol,
+        e.codigo_empresa AS codigo_stand,
+        e.nombre_corporativo AS objeto_titulo,
+        ROUND((v.calidad_servicio + v.atencion + v.propuesta_valor + v.innovacion + v.impacto_social_economico)/5.0, 1) AS puntaje,
+        TIMESTAMPDIFF(SECOND, v.creado_en, NOW()) AS segundos_hace
+      FROM valoraciones_empresas v
+      JOIN usuarios u ON v.usuario_id = u.id
+      JOIN empresas e ON v.empresa_id = e.id
+      ORDER BY v.creado_en DESC
+      LIMIT 10
+    `);
+
     // Combinar y ordenar por fecha descendente
-    const feed = [...actividadesProyectos, ...actividadesCharlas, ...actividadesProspectos]
+    const feed = [...actividadesProyectos, ...actividadesCharlas, ...actividadesProspectos, ...actividadesEmpresas]
       .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-      .slice(0, 15);
+      .slice(0, 15)
+      .map((item) => ({ ...item, segundos_hace: Math.max(0, Number(item.segundos_hace || 0)) }));
 
     res.json({
       success: true,

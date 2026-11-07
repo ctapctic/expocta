@@ -189,33 +189,50 @@ exports.obtenerLeaderboard = async (req, res, next) => {
         (SELECT COUNT(*) FROM proyectos) AS total_stands
     `);
 
-    // Ticker reciente (stands + charlas) para barra en movimiento en pantallas gigantes
+    // Ticker reciente (stands + charlas + empresas) para barra en movimiento en pantallas gigantes.
+    // segundos_hace se calcula contra NOW() de la base para no depender del reloj del cliente.
     const tickerEvents = await db.query(`
-      SELECT 
-        u.nombre AS usuario,
-        u.rol,
-        'stand' AS tipo,
-        p.codigo_stand AS codigo,
-        p.titulo AS titulo,
-        ROUND((v.innovacion + v.dominio_tecnico + v.presentacion + v.impacto)/4.0, 1) AS nota,
-        v.creado_en AS fecha
-      FROM valoraciones_proyectos v
-      JOIN usuarios u ON v.usuario_id = u.id
-      JOIN proyectos p ON v.proyecto_id = p.id
-      UNION ALL
-      SELECT 
-        u.nombre,
-        u.rol,
-        'charla',
-        c.codigo_charla,
-        c.titulo,
-        ROUND((vc.nota_contenido + vc.nota_expositor)/2.0, 1),
-        vc.creado_en
-      FROM valoraciones_charlas vc
-      JOIN usuarios u ON vc.usuario_id = u.id
-      JOIN charlas c ON vc.charla_id = c.id
-      ORDER BY fecha DESC
-      LIMIT 5
+      SELECT t.*, TIMESTAMPDIFF(SECOND, t.fecha, NOW()) AS segundos_hace
+      FROM (
+        SELECT 
+          u.nombre AS usuario,
+          u.rol,
+          'stand' AS tipo,
+          p.codigo_stand AS codigo,
+          p.titulo AS titulo,
+          ROUND((v.innovacion + v.dominio_tecnico + v.presentacion + v.impacto)/4.0, 1) AS nota,
+          v.creado_en AS fecha
+        FROM valoraciones_proyectos v
+        JOIN usuarios u ON v.usuario_id = u.id
+        JOIN proyectos p ON v.proyecto_id = p.id
+        UNION ALL
+        SELECT 
+          u.nombre,
+          u.rol,
+          'charla',
+          c.codigo_charla,
+          c.titulo,
+          ROUND((vc.nota_contenido + vc.nota_expositor)/2.0, 1),
+          vc.creado_en
+        FROM valoraciones_charlas vc
+        JOIN usuarios u ON vc.usuario_id = u.id
+        JOIN charlas c ON vc.charla_id = c.id
+        UNION ALL
+        SELECT
+          u.nombre,
+          u.rol,
+          'empresa',
+          e.codigo_empresa,
+          e.nombre_corporativo,
+          ROUND((ve.calidad_servicio + ve.atencion + ve.propuesta_valor + ve.innovacion + ve.impacto_social_economico)/5.0, 1),
+          ve.creado_en
+        FROM valoraciones_empresas ve
+        JOIN usuarios u ON ve.usuario_id = u.id
+        JOIN empresas e ON ve.empresa_id = e.id
+        ORDER BY fecha DESC
+        LIMIT 5
+      ) AS t
+      ORDER BY t.fecha DESC
     `);
 
     // Próximas charlas por horario, con su valoración acumulada
@@ -304,7 +321,8 @@ exports.obtenerLeaderboard = async (req, res, next) => {
         codigo: ev.codigo,
         titulo: ev.titulo,
         nota: Number(parseFloat(ev.nota || 0).toFixed(1)),
-        fecha: ev.fecha
+        fecha: ev.fecha,
+        segundos_hace: Math.max(0, Number(ev.segundos_hace || 0))
       })),
       charlas_proximas: charlasProximas.map((c) => ({
         id: Number(c.id),

@@ -195,8 +195,8 @@
           <span style="width:7px;height:7px;background:var(--green);border-radius:50%;display:inline-block;"></span>
           <span class="tick-badge">${ev.codigo}</span>
           <span>${ev.titulo}</span>
-          <i class="bi ${ev.tipo === 'charla' ? 'bi-easel2-fill' : 'bi-star-fill text-warning'}"
-             style="font-size:0.75rem;${ev.tipo === 'charla' ? 'color:var(--purple);' : ''}"></i>
+          <i class="bi ${ev.tipo === 'charla' ? 'bi-easel2-fill' : ev.tipo === 'empresa' ? 'bi-building-fill' : 'bi-star-fill text-warning'}"
+             style="font-size:0.75rem;${ev.tipo === 'charla' ? 'color:var(--purple);' : ev.tipo === 'empresa' ? 'color:var(--green);' : ''}"></i>
           <span class="tick-score">${Number(ev.nota).toFixed(1)}</span>
           <span style="color:#334155;">— ${ev.usuario} (${ev.rol})</span>
         </span>
@@ -208,15 +208,21 @@
       const list = document.getElementById('feed-list');
       if (!list || !items.length) return;
       list.innerHTML = items.map(ev => {
-        const ago = timeAgo(new Date(ev.fecha));
+        const ago = timeAgo(new Date(ev.fecha), ev.segundos_hace);
         const esCharla = ev.tipo === 'charla';
+        const esEmpresa = ev.tipo === 'empresa';
+        const icono = esCharla ? 'bi-easel2-fill' : esEmpresa ? 'bi-building-fill' : 'bi-geo-alt-fill';
+        const iconStyle = esCharla
+          ? 'style="color:var(--purple);"'
+          : esEmpresa
+            ? 'style="color:var(--green);"'
+            : 'style="color:#22d3ee;"';
         return `
           <div class="feed-item">
             <span class="feed-dot"></span>
             <div class="flex-grow-1" style="overflow:hidden;">
               <div class="fw-semibold text-white" style="font-size:0.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                <i class="bi ${esCharla ? 'bi-easel2-fill' : 'bi-geo-alt-fill'} ${esCharla ? '' : 'text-info'} me-1"
-                   ${esCharla ? 'style="color:var(--purple);"' : ''}></i>${ev.codigo} &mdash; ${ev.titulo}
+                <i class="bi ${icono} me-1" ${iconStyle}></i>${ev.codigo} &mdash; ${ev.titulo}
               </div>
               <div style="font-size:0.73rem;color:#64748b;">
                 ${ev.usuario}
@@ -344,9 +350,11 @@
       }).join('');
     }
 
-    function timeAgo(date) {
-      const s = Math.floor((Date.now() - date.getTime()) / 1000);
-      if (s < 60) return `hace ${s}s`;
+    function timeAgo(date, segundos) {
+      const s = segundos != null
+        ? Math.max(0, Math.floor(segundos))
+        : Math.floor((Date.now() - date.getTime()) / 1000);
+      if (s < 60) return 'hace un momento';
       if (s < 3600) return `hace ${Math.floor(s / 60)}min`;
       return `hace ${Math.floor(s / 3600)}h`;
     }

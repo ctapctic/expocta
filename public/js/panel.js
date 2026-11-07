@@ -85,7 +85,7 @@ async function loadLiveEventFeed() {
       }
 
       container.innerHTML = data.feed.map(item => {
-        const timeAgo = formatTimeAgo(new Date(item.fecha));
+        const timeAgo = formatTimeAgo(new Date(item.fecha), item.segundos_hace);
         let badgeIcon = 'bi-star-fill text-warning';
         let actionText = `evaluó el Stand <strong>${item.codigo_stand} - ${item.objeto_titulo}</strong>`;
         let tagColor = 'bg-primary';
@@ -98,6 +98,10 @@ async function loadLiveEventFeed() {
           badgeIcon = 'bi-mortarboard-fill text-success';
           actionText = `solicitó información sobre la carrera <strong>${item.objeto_titulo}</strong>`;
           tagColor = 'bg-success';
+        } else if (item.tipo === 'evaluacion_empresa') {
+          badgeIcon = 'bi-building-fill text-primary';
+          actionText = `evaluó la empresa <strong>${item.codigo_stand} - ${item.objeto_titulo}</strong>`;
+          tagColor = 'bg-dark';
         }
 
         return `
@@ -392,8 +396,8 @@ async function cargarMiResumenPersonal() {
 /**
  * Helper para formatear tiempo transcurrido (hace X minutos)
  */
-function formatTimeAgo(date) {
-  const seconds = Math.floor((new Date() - date) / 1000);
+function formatTimeAgo(date, segundos) {
+  const seconds = segundos != null ? Math.max(0, Math.floor(segundos)) : Math.floor((new Date() - date) / 1000);
   if (seconds < 60) return 'Hace un momento';
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `Hace ${minutes} min`;
