@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const archivosService = require('../services/archivosService');
 const ventanasService = require('../services/ventanasService');
+const edicionService = require('../services/edicionService');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
 const path = require('path');
@@ -9,7 +10,7 @@ const fs = require('fs');
 // Cache del leaderboard (pantallas gigantes). Evita recalcular las agregaciones
 // cuando hay varios televisores/monitores refrescando al mismo tiempo.
 const LEADERBOARD_CACHE_MS = 5000;
-let leaderboardCache = { at: 0, body: null };
+let leaderboardCache = { at: 0, edicion: null, body: null };
 
 /**
  * Obtener un proyecto específico por código de stand (ej: STAND-101) con promedio y total de votos
@@ -17,6 +18,7 @@ let leaderboardCache = { at: 0, body: null };
 exports.obtenerProyectoPorCodigo = async (req, res, next) => {
   try {
     const { codigo } = req.params;
+    const edicionActiva = await edicionService.cargar();
 
     const sql = `
       SELECT 
@@ -29,11 +31,11 @@ exports.obtenerProyectoPorCodigo = async (req, res, next) => {
         COUNT(v.id) AS total_votos
       FROM proyectos p
       LEFT JOIN valoraciones_proyectos v ON p.id = v.proyecto_id
-      WHERE p.codigo_stand = ? OR p.id = ?
+      WHERE (p.codigo_stand = ? OR p.id = ?) AND p.edicion = ?
       GROUP BY p.id
     `;
 
-    const rows = await db.query(sql, [codigo, codigo]);
+    const rows = await db.query(sql, [codigo, codigo, edicionActiva]);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({
@@ -125,6 +127,16 @@ exports.evaluarProyecto = async (req, res, next) => {
       });
     }
 
+    // Solo se evalúan proyectos de la edición activa
+    const edicionActiva = await edicionService.cargar();
+    const projRows = await db.query('SELECT edicion FROM proyectos WHERE id = ?', [parseInt(proyecto_id, 10)]);
+    if (!projRows || projRows.length === 0 || String(projRows[0].edicion) !== String(edicionActiva)) {
+      return res.status(404).json({
+        success: false,
+        message: 'El proyecto no está disponible en la edición actual.'
+      });
+    }
+
     const sql = `
       INSERT INTO valoraciones_proyectos 
       (usuario_id, proyecto_id, innovacion, dominio_tecnico, presentacion, impacto, comentario)
@@ -162,10 +174,9 @@ exports.evaluarProyecto = async (req, res, next) => {
  */
 exports.obtenerLeaderboard = async (req, res, next) => {
   try {
-    // Cache en memoria: si hay varias pantallas refrescando a la vez, la base
-    // se consulta como máximo una vez cada LEADERBOARD_CACHE_MS milisegundos.
+    const edicionActiva = await edicionService.cargar();
     const ahoraMs = Date.now();
-    if (leaderboardCache.body && ahoraMs - leaderboardCache.at < LEADERBOARD_CACHE_MS) {
+    if (leaderboardCache.body && leaderboardCache.edicion === edicionActiva && ahoraMs - leaderboardCache.at < LEADERBOARD_CACHE_MS) {
       return res.json(leaderboardCache.body);
     }
 
@@ -182,12 +193,13 @@ exports.obtenerLeaderboard = async (req, res, next) => {
         COUNT(v.id) AS total_votos
       FROM proyectos p
       LEFT JOIN valoraciones_proyectos v ON p.id = v.proyecto_id
+      WHERE p.edicion = ?
       GROUP BY p.id
       ORDER BY promedio DESC, total_votos DESC
       LIMIT 5
     `;
 
-    const rawRows = await db.query(sql);
+    const rawRows = await db.query(sql, [edicionActiva]);
 
     const leaderboard = rawRows.map((row, index) => ({
       posicion: index + 1,
@@ -398,7 +410,7 @@ exports.obtenerLeaderboard = async (req, res, next) => {
       leaderboard
     };
 
-    leaderboardCache = { at: Date.now(), body };
+    leaderboardCache = { at: Date.now(), edicion: edicionActiva, body };
     res.json(body);
   } catch (err) {
     next(err);
@@ -412,6 +424,7 @@ exports.obtenerLeaderboard = async (req, res, next) => {
 exports.getAllProyectos = async (req, res, next) => {
   try {
     const { search, especialidad, trl } = req.query;
+    const edicionActiva = await edicionService.cargar();
 
     let sql = `
       SELECT 
@@ -420,9 +433,9 @@ exports.getAllProyectos = async (req, res, next) => {
         COUNT(v.id) AS total_votos
       FROM proyectos p
       LEFT JOIN valoraciones_proyectos v ON p.id = v.proyecto_id
-      WHERE 1=1
+      WHERE p.edicion = ?
     `;
-    const params = [];
+    const params = [edicionActiva];
 
     if (search) {
       sql += ` AND (p.titulo LIKE ? OR p.codigo_stand LIKE ? OR p.tecnologias_usadas LIKE ?)`;
@@ -527,10 +540,12 @@ exports.createProyecto = async (req, res, next) => {
       requerimientosExhibicion = String(requerimientosExhibicion).trim();
     }
 
+    const edicionActiva = await edicionService.cargar();
+
     const insertResult = await db.query(`
       INSERT INTO proyectos
-      (codigo_stand, titulo, especialidad, sector_aplicacion, impacto_ods, resumen_ejecutivo, problema_que_resuelve, trl_nivel, tecnologias_usadas, integrantes, docente_tutor, imagen_url, video_pitch_url, enlace_tecnico_url, pdf_poster_url, requerimientos_exhibicion)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (codigo_stand, titulo, especialidad, sector_aplicacion, impacto_ods, resumen_ejecutivo, problema_que_resuelve, trl_nivel, tecnologias_usadas, integrantes, docente_tutor, imagen_url, video_pitch_url, enlace_tecnico_url, pdf_poster_url, requerimientos_exhibicion, edicion)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       codigo_stand.toUpperCase().trim(),
       titulo.trim(),
@@ -547,7 +562,8 @@ exports.createProyecto = async (req, res, next) => {
       video_pitch_url || null,
       enlaceTecnicoUrl,
       pdf_poster_url,
-      requerimientosExhibicion
+      requerimientosExhibicion,
+      edicionActiva
     ]);
 
     res.status(201).json({

@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const edicionService = require('../services/edicionService');
 const ventanasService = require('../services/ventanasService');
 
 /**
@@ -6,15 +7,17 @@ const ventanasService = require('../services/ventanasService');
  */
 exports.getAllEmpresas = async (req, res, next) => {
   try {
+    const edicionActiva = await edicionService.cargar();
     const rawRows = await db.query(`
       SELECT e.*,
         COALESCE(AVG((v.calidad_servicio + v.atencion + v.propuesta_valor + v.innovacion + v.impacto_social_economico) / 5.0), 0) AS promedio,
         COUNT(v.id) AS total_votos
       FROM empresas e
       LEFT JOIN valoraciones_empresas v ON e.id = v.empresa_id
+      WHERE e.edicion = ?
       GROUP BY e.id
       ORDER BY nombre_corporativo ASC
-    `);
+    `, [edicionActiva]);
 
     const empresas = rawRows.map(e => ({
       ...e,
@@ -39,6 +42,7 @@ exports.getAllEmpresas = async (req, res, next) => {
 exports.getEmpresaByIdOrCode = async (req, res, next) => {
   try {
     const { identifier } = req.params;
+    const edicionActiva = await edicionService.cargar();
     const rows = await db.query(`
       SELECT e.*,
         COALESCE(AVG((v.calidad_servicio + v.atencion + v.propuesta_valor + v.innovacion + v.impacto_social_economico) / 5.0), 0) AS promedio,
@@ -50,9 +54,9 @@ exports.getEmpresaByIdOrCode = async (req, res, next) => {
         COUNT(v.id) AS total_votos
       FROM empresas e
       LEFT JOIN valoraciones_empresas v ON e.id = v.empresa_id
-      WHERE e.id = ? OR e.codigo_empresa = ?
+      WHERE (e.id = ? OR e.codigo_empresa = ?) AND e.edicion = ?
       GROUP BY e.id
-    `, [identifier, identifier]);
+    `, [identifier, identifier, edicionActiva]);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Empresa no encontrada.' });
@@ -178,6 +182,12 @@ exports.evaluarEmpresa = async (req, res, next) => {
       });
     }
 
+    const edicionActiva = await edicionService.cargar();
+    const empEdicion = await db.query('SELECT edicion FROM empresas WHERE id = ?', [parseInt(empresa_id, 10)]);
+    if (!empEdicion || empEdicion.length === 0 || String(empEdicion[0].edicion) !== String(edicionActiva)) {
+      return res.status(404).json({ success: false, message: 'La empresa no está disponible en la edición actual.' });
+    }
+
     // Verificar que la empresa existe
     const emp = await db.query('SELECT id FROM empresas WHERE id = ?', [parseInt(empresa_id, 10)]);
     if (!emp || emp.length === 0) {
@@ -222,6 +232,7 @@ exports.evaluarEmpresa = async (req, res, next) => {
  */
 exports.getStatsAndRankingEmpresas = async (req, res, next) => {
   try {
+    const edicionActiva = await edicionService.cargar();
     const topEmpresas = await db.query(`
       SELECT 
         e.id, e.codigo_empresa, e.nombre_corporativo, e.tipo, e.stand_numero, e.logo_url,
@@ -229,16 +240,17 @@ exports.getStatsAndRankingEmpresas = async (req, res, next) => {
         COUNT(v.id) AS total_votos
       FROM empresas e
       LEFT JOIN valoraciones_empresas v ON e.id = v.empresa_id
+      WHERE e.edicion = ?
       GROUP BY e.id
       ORDER BY promedio DESC, total_votos DESC
       LIMIT 5
-    `);
+    `, [edicionActiva]);
 
     const statsGenerales = await db.query(`
       SELECT
-        (SELECT COUNT(*) FROM empresas) AS total_empresas,
+        (SELECT COUNT(*) FROM empresas WHERE edicion = ?) AS total_empresas,
         (SELECT COUNT(*) FROM valoraciones_empresas) AS total_evaluaciones_empresas
-    `);
+    `, [edicionActiva]);
 
     res.json({
       success: true,
@@ -310,10 +322,11 @@ exports.createEmpresa = async (req, res, next) => {
       }
     }
 
+    const edicionActiva = await edicionService.cargar();
     const result = await db.query(`
       INSERT INTO empresas 
-      (codigo_empresa, nombre_corporativo, tipo, stand_numero, descripcion, ofertas_pasantia, requisitos_perfil, logo_url, catalogo_pdf_url)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (codigo_empresa, nombre_corporativo, tipo, stand_numero, descripcion, ofertas_pasantia, requisitos_perfil, logo_url, catalogo_pdf_url, edicion)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       codigo_empresa.toUpperCase().trim(),
       nombre_corporativo.trim(),
@@ -323,7 +336,8 @@ exports.createEmpresa = async (req, res, next) => {
       ofertas_pasantia ? ofertas_pasantia.trim() : '',
       requisitos_perfil ? requisitos_perfil.trim() : '',
       logo_url,
-      catalogo_pdf_url
+      catalogo_pdf_url,
+      edicionActiva
     ]);
 
     res.status(201).json({

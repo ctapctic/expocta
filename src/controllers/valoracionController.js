@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const ventanasService = require('../services/ventanasService');
+const edicionService = require('../services/edicionService');
 
 /**
  * Responda 403 si la votación está cerrada para este usuario.
@@ -40,6 +41,12 @@ exports.valorarProyecto = async (req, res, next) => {
     }
 
     if (await bloqueadaPorVentana(req, res, usuario_id)) return;
+
+    const edicionActiva = await edicionService.cargar();
+    const projRows = await db.query('SELECT edicion FROM proyectos WHERE id = ?', [parseInt(proyecto_id, 10)]);
+    if (!projRows || projRows.length === 0 || String(projRows[0].edicion) !== String(edicionActiva)) {
+      return res.status(404).json({ success: false, message: 'El proyecto no está disponible en la edición actual.' });
+    }
 
     // Insertar o actualizar si ya fue valorado por el mismo usuario
     const sql = `
@@ -96,6 +103,12 @@ exports.valorarCharla = async (req, res, next) => {
     }
 
     if (await bloqueadaPorVentana(req, res, usuario_id)) return;
+
+    const edicionActiva = await edicionService.cargar();
+    const charlaRows = await db.query('SELECT edicion FROM charlas WHERE id = ?', [parseInt(charla_id, 10)]);
+    if (!charlaRows || charlaRows.length === 0 || String(charlaRows[0].edicion) !== String(edicionActiva)) {
+      return res.status(404).json({ success: false, message: 'La charla no está disponible en la edición actual.' });
+    }
 
     const sql = `
       INSERT INTO valoraciones_charlas 
@@ -219,6 +232,7 @@ exports.syncBatchEvaluaciones = async (req, res, next) => {
  */
 exports.getStatsAndRanking = async (req, res, next) => {
   try {
+    const edicionActiva = await edicionService.cargar();
     const topProyectos = await db.query(`
       SELECT 
         p.id, p.codigo_stand, p.titulo, p.especialidad, p.imagen_url,
@@ -226,10 +240,11 @@ exports.getStatsAndRanking = async (req, res, next) => {
         COUNT(v.id) AS total_votos
       FROM proyectos p
       LEFT JOIN valoraciones_proyectos v ON p.id = v.proyecto_id
+      WHERE p.edicion = ?
       GROUP BY p.id
       ORDER BY promedio_general DESC, total_votos DESC
       LIMIT 5
-    `);
+    `, [edicionActiva]);
 
     const statsGenerales = await db.query(`
       SELECT

@@ -84,7 +84,8 @@
         [
           'nombre_evento','anio_evento','institucion_organizadora',
           'institucion_padre','sede','mensaje_bienvenida',
-          'logo_ministerio_url','logo_institucion_url','color_primario'
+          'logo_ministerio_url','logo_institucion_url','color_primario',
+           'edicion_actual'
         ].forEach(k => {
           const el = document.getElementById(k);
           if (el && c[k]) el.value = c[k].valor || '';

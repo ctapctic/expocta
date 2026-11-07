@@ -26,7 +26,8 @@ const DEFAULTS = [
   ['registro_inicio',          '',                                       'Inicio de la ventana de registro (ISO 8601 UTC, vacío = sin límite)'],
   ['registro_fin',             '',                                       'Fin de la ventana de registro (ISO 8601 UTC, vacío = sin límite)'],
   ['votacion_inicio',          '',                                       'Inicio de la ventana de votación (ISO 8601 UTC, vacío = sin límite)'],
-  ['votacion_fin',             '',                                       'Fin de la ventana de votación (ISO 8601 UTC, vacío = sin límite)']
+  ['votacion_fin',             '',                                       'Fin de la ventana de votación (ISO 8601 UTC, vacío = sin límite)'],
+  ['edicion_actual',           '2026',                                   'Edición activa del evento (filtra listados, evaluaciones y leaderboard)']
 ];
 
 async function run() {

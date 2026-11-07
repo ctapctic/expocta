@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const ventanasService = require('../services/ventanasService');
+const edicionService = require('../services/edicionService');
 
 /**
  * Valida y normaliza el link externo de información de una oferta.
@@ -25,15 +26,17 @@ function parseLinkInformacion(value) {
  */
 exports.obtenerOfertas = async (req, res, next) => {
   try {
+    const edicionActiva = await edicionService.cargar();
     const rawRows = await db.query(`
       SELECT 
         o.*,
         COUNT(p.id) AS total_prospectos
       FROM oferta_formativa o
       LEFT JOIN prospectos_eftp p ON o.id = p.oferta_id
+      WHERE o.edicion = ?
       GROUP BY o.id
       ORDER BY o.nombre_carrera ASC
-    `);
+    `, [edicionActiva]);
 
     const ofertas = rawRows.map(row => ({
       ...row,
@@ -82,6 +85,12 @@ exports.registrarProspecto = async (req, res, next) => {
       });
     }
 
+    const edicionActiva = await edicionService.cargar();
+    const ofertaRows = await db.query('SELECT edicion FROM oferta_formativa WHERE id = ?', [parseInt(oferta_id, 10)]);
+    if (!ofertaRows || ofertaRows.length === 0 || String(ofertaRows[0].edicion) !== String(edicionActiva)) {
+      return res.status(404).json({ success: false, message: 'La oferta no está disponible en la edición actual.' });
+    }
+
     const result = await db.query(`
       INSERT INTO prospectos_eftp (usuario_id, oferta_id, telefono, comentario)
       VALUES (?, ?, ?, ?)
@@ -114,10 +123,11 @@ exports.registrarProspecto = async (req, res, next) => {
 exports.getOfertaByIdOrCode = async (req, res, next) => {
   try {
     const { identifier } = req.params;
+    const edicionActiva = await edicionService.cargar();
     const rows = await db.query(`
       SELECT o.* FROM oferta_formativa o
-      WHERE o.id = ? OR o.codigo_oferta = ?
-    `, [identifier, identifier]);
+      WHERE (o.id = ? OR o.codigo_oferta = ?) AND o.edicion = ?
+    `, [identifier, identifier, edicionActiva]);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Oferta formativa no encontrada.' });
@@ -266,10 +276,11 @@ exports.createOferta = async (req, res, next) => {
       brochure_pdf_url = `/uploads/${req.file.filename}`;
     }
 
+    const edicionActiva = await edicionService.cargar();
     const result = await db.query(`
       INSERT INTO oferta_formativa 
-      (codigo_oferta, nombre_carrera, duracion_horas, modalidad, perfil_egreso, requisitos_admision, brochure_pdf_url, video_lab_url, link_informacion_url)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (codigo_oferta, nombre_carrera, duracion_horas, modalidad, perfil_egreso, requisitos_admision, brochure_pdf_url, video_lab_url, link_informacion_url, edicion)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       codigo_oferta.toUpperCase().trim(),
       nombre_carrera.trim(),
@@ -279,7 +290,8 @@ exports.createOferta = async (req, res, next) => {
       requisitos_admision || '',
       brochure_pdf_url,
       video_lab_url || null,
-      link.value
+      link.value,
+      edicionActiva
     ]);
 
     res.status(201).json({

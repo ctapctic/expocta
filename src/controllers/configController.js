@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const ventanasService = require('../services/ventanasService');
+const edicionService = require('../services/edicionService');
 
 /**
  * GET /api/config
@@ -77,6 +78,7 @@ exports.updateConfig = async (req, res, next) => {
     // Las ventanas de tiempo se leen con cache: invalidar para que el cambio
     // tenga efecto inmediato (sin reiniciar el servidor).
     ventanasService.invalidarCache();
+    edicionService.invalidarCache();
 
     res.json({
       success: true,

@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const edicionService = require('../services/edicionService');
 
 /**
  * Normaliza el valor de un input datetime-local ("YYYY-MM-DDTHH:MM")
@@ -15,6 +16,7 @@ function normalizarHorario(valor) {
  */
 exports.getAllCharlas = async (req, res, next) => {
   try {
+    const edicionActiva = await edicionService.cargar();
     const rawRows = await db.query(`
       SELECT 
         c.*,
@@ -23,9 +25,10 @@ exports.getAllCharlas = async (req, res, next) => {
         COUNT(v.id) AS total_valoraciones
       FROM charlas c
       LEFT JOIN valoraciones_charlas v ON c.id = v.charla_id
+      WHERE c.edicion = ?
       GROUP BY c.id
       ORDER BY c.horario ASC
-    `);
+    `, [edicionActiva]);
 
     const charlas = rawRows.map(row => ({
       ...row,
@@ -50,6 +53,7 @@ exports.getAllCharlas = async (req, res, next) => {
 exports.getCharlaByIdOrCode = async (req, res, next) => {
   try {
     const { identifier } = req.params;
+    const edicionActiva = await edicionService.cargar();
 
     const rows = await db.query(`
       SELECT 
@@ -61,9 +65,9 @@ exports.getCharlaByIdOrCode = async (req, res, next) => {
         COUNT(v.id) AS total_valoraciones
       FROM charlas c
       LEFT JOIN valoraciones_charlas v ON c.id = v.charla_id
-      WHERE c.id = ? OR c.codigo_charla = ?
+      WHERE (c.id = ? OR c.codigo_charla = ?) AND c.edicion = ?
       GROUP BY c.id
-    `, [identifier, identifier]);
+    `, [identifier, identifier, edicionActiva]);
 
     if (!rows || rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Charla o conferencia no encontrada.' });
@@ -218,10 +222,11 @@ exports.createCharla = async (req, res, next) => {
       foto_expositor_url = `/uploads/${req.files.foto_expositor[0].filename}`;
     }
 
+    const edicionActiva = await edicionService.cargar();
     const result = await db.query(`
       INSERT INTO charlas
-      (codigo_charla, titulo, eje_tematico, expositor, biografia_expositor, foto_expositor_url, horario, ubicacion, diapositivas_pdf_url)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (codigo_charla, titulo, eje_tematico, expositor, biografia_expositor, foto_expositor_url, horario, ubicacion, diapositivas_pdf_url, edicion)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       codigo_charla.toUpperCase().trim(),
       titulo.trim(),
@@ -231,7 +236,8 @@ exports.createCharla = async (req, res, next) => {
       foto_expositor_url,
       normalizarHorario(horario),
       ubicacion.trim(),
-      diapositivas_pdf_url
+      diapositivas_pdf_url,
+      edicionActiva
     ]);
 
     res.status(201).json({
