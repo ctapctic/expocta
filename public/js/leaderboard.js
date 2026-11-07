@@ -1,4 +1,4 @@
-    const REFRESH_MS = 10000;
+    const REFRESH_MS = 15000;
     const FALLBACK = 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80';
 
     document.addEventListener('DOMContentLoaded', () => {

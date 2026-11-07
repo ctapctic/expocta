@@ -5,6 +5,11 @@ const QRCode = require('qrcode');
 const path = require('path');
 const fs = require('fs');
 
+// Cache del leaderboard (pantallas gigantes). Evita recalcular las agregaciones
+// cuando hay varios televisores/monitores refrescando al mismo tiempo.
+const LEADERBOARD_CACHE_MS = 5000;
+let leaderboardCache = { at: 0, body: null };
+
 /**
  * Obtener un proyecto específico por código de stand (ej: STAND-101) con promedio y total de votos
  */
@@ -147,6 +152,13 @@ exports.evaluarProyecto = async (req, res, next) => {
  */
 exports.obtenerLeaderboard = async (req, res, next) => {
   try {
+    // Cache en memoria: si hay varias pantallas refrescando a la vez, la base
+    // se consulta como máximo una vez cada LEADERBOARD_CACHE_MS milisegundos.
+    const ahoraMs = Date.now();
+    if (leaderboardCache.body && ahoraMs - leaderboardCache.at < LEADERBOARD_CACHE_MS) {
+      return res.json(leaderboardCache.body);
+    }
+
     const sql = `
       SELECT 
         p.id,
@@ -311,7 +323,7 @@ exports.obtenerLeaderboard = async (req, res, next) => {
       LIMIT 6
     `);
 
-    res.json({
+    const body = {
       success: true,
       timestamp: new Date().toISOString(),
       telemetria: {
@@ -374,7 +386,10 @@ exports.obtenerLeaderboard = async (req, res, next) => {
         total_votos: Number(e.total_votos || 0)
       })),
       leaderboard
-    });
+    };
+
+    leaderboardCache = { at: Date.now(), body };
+    res.json(body);
   } catch (err) {
     next(err);
   }
