@@ -53,8 +53,27 @@
       <p class="text-muted small mb-0">Conecta con los sectores industriales y tecnológicos interesados en el talento EFTP.</p>
     </div>
 
+    <!-- FILTROS -->
+    <div class="card card-body border-0 shadow-sm mb-4 rounded-4 bg-white">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label small fw-bold text-muted">Buscar por Nombre o Código</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+            <input type="text" id="search-empresas" class="form-control" placeholder="Ej: TechAutomation, EMP-01...">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small fw-bold text-muted">Filtrar por Tipo</label>
+          <select id="tipo-filter-empresas" class="form-select">
+            <option value="">Todos los tipos</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
     <!-- CONTENEDOR DE EMPRESAS -->
-    <div class="row" id="empresas-container">
+    <div class="row g-3" id="empresas-container">
       <div class="col-12 text-center py-5">
         <div class="spinner-border text-primary" role="status"></div>
         <p class="mt-2 text-muted">Cargando empresas...</p>

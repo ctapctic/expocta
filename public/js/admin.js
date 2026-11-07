@@ -237,9 +237,11 @@ const CRUD_ENTIDADES = {
     columnas: [
       { titulo: 'Código', campo: 'codigo_empresa' },
       { titulo: 'Nombre Corporativo', campo: 'nombre_corporativo' },
+      { titulo: 'Tipo', campo: 'tipo', badge: 'bg-secondary' },
+      { titulo: 'Stand', campo: 'stand_numero' },
       { titulo: 'Descripción', campo: 'descripcion', fmt: (v) => v && v.length > 80 ? v.slice(0, 80) + '…' : v }
     ],
-    campos: ['codigo_empresa', 'nombre_corporativo', 'descripcion', 'ofertas_pasantia', 'requisitos_perfil'],
+    campos: ['codigo_empresa', 'nombre_corporativo', 'tipo', 'stand_numero', 'descripcion', 'ofertas_pasantia', 'requisitos_perfil'],
     archivos: { logo: (r) => r.logo_url, catalogo_pdf: (r) => r.catalogo_pdf_url }
   }
 };

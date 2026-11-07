@@ -7,6 +7,9 @@ const { requireAdminOrDocente } = require('../middleware/authMiddleware');
 router.get('/', empresaController.getAllEmpresas);
 router.get('/:identifier', empresaController.getEmpresaByIdOrCode);
 
+// Evaluar una empresa (Cualquier visitante/evaluador)
+router.post('/evaluar', empresaController.evaluarEmpresa);
+
 // Alta de empresa (Requiere Admin/Docente)
 router.post('/', requireAdminOrDocente, upload.fields([
   { name: 'logo', maxCount: 1 },
