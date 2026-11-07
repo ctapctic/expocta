@@ -127,7 +127,6 @@ function renderEmpresas(empresas) {
   }).join('');
 }
 
-// Modal de evaluación de empresa
 async function evaluarEmpresaModal(empresaId, nombreEmpresa) {
   const usuario = getCurrentUser();
   if (!usuario) {
@@ -135,68 +134,107 @@ async function evaluarEmpresaModal(empresaId, nombreEmpresa) {
     return;
   }
 
+  // Verificar si ya evaluó
+  let yaEvaluo = false;
+  let miValoracion = null;
+  try {
+    const res = await fetch(`/api/empresas/${empresaId}`);
+    const data = await res.json();
+    if (data.success && data.empresa) {
+      // Check if user already evaluated - we'll handle via API response
+    }
+  } catch (_) {}
+
+  const disabledAttr = '';
+
   const { value: formValues } = await Swal.fire({
     title: `Evaluar: ${nombreEmpresa}`,
+    width: '600px',
     html: `
       <div class="text-start">
-        <div class="mb-3">
-          <label class="form-label small fw-bold">Calidad del Servicio</label>
-          <select id="swal-calidad" class="form-select form-select-sm">
-            <option value="">Seleccionar...</option>
-            <option value="1">1 - Deficiente</option>
-            <option value="2">2 - Regular</option>
-            <option value="3">3 - Bueno</option>
-            <option value="4">4 - Muy bueno</option>
-            <option value="5">5 - Excelente</option>
-          </select>
+        <div class="alert alert-light border py-2 mb-3 small d-flex justify-content-between align-items-center">
+          <span><strong>Evaluador:</strong> ${usuario.nombre}</span>
+          <span class="badge bg-secondary text-uppercase">${usuario.rol}</span>
         </div>
-        <div class="mb-3">
-          <label class="form-label small fw-bold">Atención</label>
-          <select id="swal-atencion" class="form-select form-select-sm">
-            <option value="">Seleccionar...</option>
-            <option value="1">1 - Deficiente</option>
-            <option value="2">2 - Regular</option>
-            <option value="3">3 - Bueno</option>
-            <option value="4">4 - Muy bueno</option>
-            <option value="5">5 - Excelente</option>
-          </select>
+
+        <!-- 1. CALIDAD DEL SERVICIO -->
+        <div class="mb-3 p-3 bg-light rounded-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="fw-bold text-dark mb-0">1. Calidad del Servicio</label>
+            <span class="small text-muted">Calidad del producto/servicio</span>
+          </div>
+          <div class="star-rating fs-3">
+            <input type="radio" id="se-cal-5" name="calidad_servicio" value="5" ${disabledAttr}><label for="se-cal-5"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-cal-4" name="calidad_servicio" value="4" ${disabledAttr}><label for="se-cal-4"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-cal-3" name="calidad_servicio" value="3" ${disabledAttr}><label for="se-cal-3"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-cal-2" name="calidad_servicio" value="2" ${disabledAttr}><label for="se-cal-2"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-cal-1" name="calidad_servicio" value="1" ${disabledAttr}><label for="se-cal-1"><i class="bi bi-star-fill"></i></label>
+          </div>
         </div>
-        <div class="mb-3">
-          <label class="form-label small fw-bold">Propuesta de Valor</label>
-          <select id="swal-propuesta" class="form-select form-select-sm">
-            <option value="">Seleccionar...</option>
-            <option value="1">1 - Deficiente</option>
-            <option value="2">2 - Regular</option>
-            <option value="3">3 - Bueno</option>
-            <option value="4">4 - Muy bueno</option>
-            <option value="5">5 - Excelente</option>
-          </select>
+
+        <!-- 2. ATENCIÓN -->
+        <div class="mb-3 p-3 bg-light rounded-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="fw-bold text-dark mb-0">2. Atención</label>
+            <span class="small text-muted">Atención al cliente/visitante</span>
+          </div>
+          <div class="star-rating fs-3">
+            <input type="radio" id="se-at-5" name="atencion" value="5" ${disabledAttr}><label for="se-at-5"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-at-4" name="atencion" value="4" ${disabledAttr}><label for="se-at-4"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-at-3" name="atencion" value="3" ${disabledAttr}><label for="se-at-3"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-at-2" name="atencion" value="2" ${disabledAttr}><label for="se-at-2"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-at-1" name="atencion" value="1" ${disabledAttr}><label for="se-at-1"><i class="bi bi-star-fill"></i></label>
+          </div>
         </div>
-        <div class="mb-3">
-          <label class="form-label small fw-bold">Innovación</label>
-          <select id="swal-innovacion" class="form-select form-select-sm">
-            <option value="">Seleccionar...</option>
-            <option value="1">1 - Deficiente</option>
-            <option value="2">2 - Regular</option>
-            <option value="3">3 - Bueno</option>
-            <option value="4">4 - Muy bueno</option>
-            <option value="5">5 - Excelente</option>
-          </select>
+
+        <!-- 3. PROPUESTA DE VALOR -->
+        <div class="mb-3 p-3 bg-light rounded-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="fw-bold text-dark mb-0">3. Propuesta de Valor</label>
+            <span class="small text-muted">Qué tan atractiva es la propuesta</span>
+          </div>
+          <div class="star-rating fs-3">
+            <input type="radio" id="se-pv-5" name="propuesta_valor" value="5" ${disabledAttr}><label for="se-pv-5"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-pv-4" name="propuesta_valor" value="4" ${disabledAttr}><label for="se-pv-4"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-pv-3" name="propuesta_valor" value="3" ${disabledAttr}><label for="se-pv-3"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-pv-2" name="propuesta_valor" value="2" ${disabledAttr}><label for="se-pv-2"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-pv-1" name="propuesta_valor" value="1" ${disabledAttr}><label for="se-pv-1"><i class="bi bi-star-fill"></i></label>
+          </div>
         </div>
-        <div class="mb-3">
-          <label class="form-label small fw-bold">Impacto Social y Económico</label>
-          <select id="swal-impacto" class="form-select form-select-sm">
-            <option value="">Seleccionar...</option>
-            <option value="1">1 - Deficiente</option>
-            <option value="2">2 - Regular</option>
-            <option value="3">3 - Bueno</option>
-            <option value="4">4 - Muy bueno</option>
-            <option value="5">5 - Excelente</option>
-          </select>
+
+        <!-- 4. INNOVACIÓN -->
+        <div class="mb-3 p-3 bg-light rounded-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="fw-bold text-dark mb-0">4. Innovación</label>
+            <span class="small text-muted">Grado de innovación</span>
+          </div>
+          <div class="star-rating fs-3">
+            <input type="radio" id="se-inn-5" name="innovacion" value="5" ${disabledAttr}><label for="se-inn-5"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-inn-4" name="innovacion" value="4" ${disabledAttr}><label for="se-inn-4"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-inn-3" name="innovacion" value="3" ${disabledAttr}><label for="se-inn-3"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-inn-2" name="innovacion" value="2" ${disabledAttr}><label for="se-inn-2"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-inn-1" name="innovacion" value="1" ${disabledAttr}><label for="se-inn-1"><i class="bi bi-star-fill"></i></label>
+          </div>
         </div>
+
+        <!-- 5. IMPACTO SOCIAL Y ECONÓMICO -->
+        <div class="mb-3 p-3 bg-light rounded-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="fw-bold text-dark mb-0">5. Impacto Social y Económico</label>
+            <span class="small text-muted">Contribución social y económica</span>
+          </div>
+          <div class="star-rating fs-3">
+            <input type="radio" id="se-imp-5" name="impacto_social_economico" value="5" ${disabledAttr}><label for="se-imp-5"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-imp-4" name="impacto_social_economico" value="4" ${disabledAttr}><label for="se-imp-4"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-imp-3" name="impacto_social_economico" value="3" ${disabledAttr}><label for="se-imp-3"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-imp-2" name="impacto_social_economico" value="2" ${disabledAttr}><label for="se-imp-2"><i class="bi bi-star-fill"></i></label>
+            <input type="radio" id="se-imp-1" name="impacto_social_economico" value="1" ${disabledAttr}><label for="se-imp-1"><i class="bi bi-star-fill"></i></label>
+          </div>
+        </div>
+
         <div class="mb-3">
           <label class="form-label small fw-bold">Comentario (opcional)</label>
-          <textarea id="swal-comentario" class="form-control form-control-sm" rows="2" placeholder="Tu opinión..."></textarea>
+          <textarea id="swal-comentario-emp" class="form-control form-control-sm" rows="2" placeholder="Tu opinión..."></textarea>
         </div>
       </div>
     `,
@@ -204,15 +242,15 @@ async function evaluarEmpresaModal(empresaId, nombreEmpresa) {
     confirmButtonText: 'Enviar Evaluación',
     cancelButtonText: 'Cancelar',
     preConfirm: () => {
-      const calidad = document.getElementById('swal-calidad').value;
-      const atencion = document.getElementById('swal-atencion').value;
-      const propuesta = document.getElementById('swal-propuesta').value;
-      const innovacion = document.getElementById('swal-innovacion').value;
-      const impacto = document.getElementById('swal-impacto').value;
-      const comentario = document.getElementById('swal-comentario').value;
+      const calidad = document.querySelector('input[name="calidad_servicio"]:checked')?.value;
+      const atencion = document.querySelector('input[name="atencion"]:checked')?.value;
+      const propuesta = document.querySelector('input[name="propuesta_valor"]:checked')?.value;
+      const innovacion = document.querySelector('input[name="innovacion"]:checked')?.value;
+      const impacto = document.querySelector('input[name="impacto_social_economico"]:checked')?.value;
+      const comentario = document.getElementById('swal-comentario-emp').value;
 
       if (!calidad || !atencion || !propuesta || !innovacion || !impacto) {
-        Swal.showValidationMessage('Todos los criterios son obligatorios.');
+        Swal.showValidationMessage('Debes calificar los 5 criterios.');
         return false;
       }
 
