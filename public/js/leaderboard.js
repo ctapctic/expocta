@@ -345,6 +345,10 @@
                 ${e.descripcion || ''}
               </div>
             </div>
+            <div class="text-end flex-shrink-0">
+              <span class="feed-score-pill"><i class="bi bi-star-fill me-1" style="font-size:0.6rem;"></i>${Number(e.promedio || 0).toFixed(1)}</span>
+              <div style="font-size:0.62rem;color:#64748b;margin-top:2px;">${e.total_votos === 1 ? '1 voto' : `${e.total_votos} votos`}</div>
+            </div>
           </div>
         `;
       }).join('');

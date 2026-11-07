@@ -292,15 +292,21 @@ exports.obtenerLeaderboard = async (req, res, next) => {
       LIMIT 3
     `);
 
-    // Empresas participantes presentes en la expo
+    // Empresas participantes presentes en la expo, con su valoración promedio
     const empresasRows = await db.query(`
       SELECT 
         e.id,
         e.codigo_empresa,
         e.nombre_corporativo,
+        e.tipo,
+        e.stand_numero,
         e.logo_url,
-        LEFT(e.descripcion, 180) AS descripcion
+        LEFT(e.descripcion, 180) AS descripcion,
+        COALESCE(AVG((v.calidad_servicio + v.atencion + v.propuesta_valor + v.innovacion + v.impacto_social_economico) / 5.0), 0) AS promedio,
+        COUNT(v.id) AS total_votos
       FROM empresas e
+      LEFT JOIN valoraciones_empresas v ON e.id = v.empresa_id
+      GROUP BY e.id
       ORDER BY e.nombre_corporativo ASC
       LIMIT 6
     `);
@@ -360,8 +366,12 @@ exports.obtenerLeaderboard = async (req, res, next) => {
         id: Number(e.id),
         codigo_empresa: e.codigo_empresa,
         nombre_corporativo: e.nombre_corporativo,
+        tipo: e.tipo,
+        stand_numero: e.stand_numero,
         logo_url: e.logo_url,
-        descripcion: e.descripcion || ''
+        descripcion: e.descripcion || '',
+        promedio: Number(parseFloat(e.promedio || 0).toFixed(2)),
+        total_votos: Number(e.total_votos || 0)
       })),
       leaderboard
     });

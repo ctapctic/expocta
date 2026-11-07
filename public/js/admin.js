@@ -147,7 +147,7 @@ async function loadAdminStats() {
                 </div>
                 <div class="text-end">
                   <span class="badge bg-warning text-dark fs-5 px-3 py-2"><i class="bi bi-star-fill me-1"></i>${Number(e.promedio).toFixed(2)}</span>
-                  <div class="small text-muted mt-1">${e.total_votos} votos</div>
+                  <div class="small text-muted mt-1">${e.total_votos === 1 ? '1 voto' : `${e.total_votos} votos`}</div>
                 </div>
               </li>
             `).join('');
@@ -272,7 +272,7 @@ const CRUD_ENTIDADES = {
       {
         titulo: 'Valoración',
         campo: 'promedio',
-        html: (r) => `<span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>${Number(r.promedio || 0).toFixed(2)}</span> <span class="small text-muted">${r.total_votos || 0} votos</span>`
+        html: (r) => `<span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>${Number(r.promedio || 0).toFixed(2)}</span> <span class="small text-muted">${r.total_votos === 1 ? '1 voto' : `${r.total_votos || 0} votos`}</span>`
       },
       { titulo: 'Descripción', campo: 'descripcion', fmt: (v) => v && v.length > 80 ? v.slice(0, 80) + '…' : v }
     ],
