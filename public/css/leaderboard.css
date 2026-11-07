@@ -129,13 +129,54 @@
       background-clip: text;
     }
 
+    /* Cada tarjeta con su propio color para que el número se lea más */
+    .stat-card.s-blue .stat-value {
+      background: linear-gradient(135deg, #ffffff 15%, #60a5fa 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .stat-card.s-green .stat-value {
+      background: linear-gradient(135deg, #ffffff 15%, #34d399 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .stat-card.s-purple .stat-value {
+      background: linear-gradient(135deg, #ffffff 15%, #c084fc 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .stat-card.s-pink .stat-value {
+      background: linear-gradient(135deg, #ffffff 15%, #fb923c 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
     .stat-label {
       font-size: 0.72rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: #64748b;
-      font-weight: 600;
+      color: #cbd5e1;
+      font-weight: 700;
       margin-top: 4px;
+    }
+
+    .stat-card.s-blue .stat-label {
+      color: #93c5fd;
+    }
+
+    .stat-card.s-green .stat-label {
+      color: #6ee7b7;
+    }
+
+    .stat-card.s-purple .stat-label {
+      color: #d8b4fe;
+    }
+
+    .stat-card.s-pink .stat-label {
+      color: #f9a8d4;
     }
 
     /* LEADERBOARD CARDS */
