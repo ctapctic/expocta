@@ -128,6 +128,36 @@ async function loadAdminStats() {
           </li>
         `).join('');
       }
+
+      // Render Ranking Top Empresas
+      const rankingEmpresasContainer = document.getElementById('top-empresas-ranking-list');
+      if (rankingEmpresasContainer) {
+        try {
+          const resEmp = await fetch('/api/empresas/stats');
+          const dataEmp = await resEmp.json();
+          if (dataEmp.success && dataEmp.topEmpresas && dataEmp.topEmpresas.length > 0) {
+            rankingEmpresasContainer.innerHTML = dataEmp.topEmpresas.map((e, index) => `
+              <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                <div>
+                  <span class="badge bg-dark rounded-circle me-2">#${index + 1}</span>
+                  <strong class="text-dark fs-6">${e.nombre_corporativo}</strong>
+                  <span class="badge bg-secondary ms-2">${e.codigo_empresa}</span>
+                  ${e.stand_numero ? `<span class="badge bg-info text-dark ms-1">Stand ${e.stand_numero}</span>` : ''}
+                  <div class="small text-muted">${e.tipo ? e.tipo.charAt(0).toUpperCase() + e.tipo.slice(1) : ''}</div>
+                </div>
+                <div class="text-end">
+                  <span class="badge bg-warning text-dark fs-5 px-3 py-2"><i class="bi bi-star-fill me-1"></i>${Number(e.promedio).toFixed(2)}</span>
+                  <div class="small text-muted mt-1">${e.total_votos} votos</div>
+                </div>
+              </li>
+            `).join('');
+          } else {
+            rankingEmpresasContainer.innerHTML = '<li class="list-group-item text-center text-muted">Sin valoraciones de empresas aún.</li>';
+          }
+        } catch (err) {
+          console.error('Error al obtener ranking de empresas:', err);
+        }
+      }
     }
   } catch (err) {
     console.error('Error al obtener estadísticas:', err);
