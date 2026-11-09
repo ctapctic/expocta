@@ -189,6 +189,7 @@ exports.obtenerLeaderboard = async (req, res, next) => {
         p.trl_nivel,
         p.imagen_url,
         p.docente_tutor,
+        p.integrantes,
         COALESCE(AVG((v.innovacion + v.dominio_tecnico + v.presentacion + v.impacto) / 4.0), 0) AS promedio,
         COUNT(v.id) AS total_votos
       FROM proyectos p
@@ -210,6 +211,7 @@ exports.obtenerLeaderboard = async (req, res, next) => {
       trl_nivel: Number(row.trl_nivel),
       imagen_url: row.imagen_url,
       docente_tutor: row.docente_tutor,
+      integrantes: row.integrantes,
       promedio: Number(parseFloat(row.promedio || 0).toFixed(2)),
       total_votos: Number(row.total_votos || 0)
     }));

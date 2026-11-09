@@ -142,6 +142,10 @@
         ? `<span class="badge" style="background:rgba(167,139,250,0.15);color:var(--purple);"><i class="bi bi-person-badge me-1"></i>${p.docente_tutor}</span>`
         : '';
 
+      const integrantes = p.integrantes
+        ? `<span class="badge" style="background:rgba(34,197,94,0.15);color:#22c55e;"><i class="bi bi-people-fill me-1"></i>${p.integrantes}</span>`
+        : '';
+
       return `
         <div class="lb-card ${cardClass}">
           <div class="d-flex flex-wrap align-items-center gap-3">
@@ -155,6 +159,7 @@
                 <span class="badge" style="background:rgba(56,189,248,0.15);color:var(--accent);">${p.especialidad}</span>
                 <span class="badge bg-secondary">TRL ${p.trl_nivel}</span>
                 ${tutor}
+                ${integrantes}
               </div>
               <h5 class="fw-bold text-white mb-2">${p.titulo}</h5>
               <div class="row g-1 lb-criteria">
